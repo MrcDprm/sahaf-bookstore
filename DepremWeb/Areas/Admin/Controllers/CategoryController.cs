@@ -1,11 +1,14 @@
 ﻿using Deprem.DataAccess.Data;
 using Deprem.DataAccess.Repository.IRepository;
 using Deprem.Models;
+using Deprem.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DepremWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
