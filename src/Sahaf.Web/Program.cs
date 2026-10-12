@@ -103,6 +103,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+// Behind Render's proxy the public port is always 443.
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
@@ -121,11 +124,23 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-    app.UseHttpsRedirection();
+    // Render's health check calls the container over plain HTTP; a redirect
+    // there would mark the service as down.
+    app.UseWhen(context => !context.Request.Path.StartsWithSegments("/healthz"),
+        branch => branch.UseHttpsRedirection());
 }
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseSecurityHeaders();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Files linked with asp-append-version (?v=hash) change URL when their
+    // content changes, so browsers may keep them for a year.
+    OnPrepareResponse = context =>
+    {
+        if (context.Context.Request.Query.ContainsKey("v"))
+            context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+    },
+});
 app.UseRequestLocalization();
 app.UseRouting();
 app.UseRateLimiter();
