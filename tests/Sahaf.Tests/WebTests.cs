@@ -53,6 +53,33 @@ public class ResourceTests
     }
 }
 
+public class ViewTests
+{
+    // Regression: the form tag helper adds the CSRF token only to forms without
+    // an explicit action; one admin form posted without it and always failed.
+    [Fact]
+    public void Every_post_form_with_an_action_carries_an_antiforgery_token()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (!Directory.Exists(Path.Combine(dir, "src"))) dir = Path.GetDirectoryName(dir)!;
+        var views = Directory.GetFiles(Path.Combine(dir, "src", "Sahaf.Web"), "*.cshtml", SearchOption.AllDirectories);
+
+        var missing = new List<string>();
+        foreach (var file in views)
+        {
+            var html = File.ReadAllText(file);
+            foreach (Match form in Regex.Matches(html, "<form[^>]*method=\"post\"[^>]*action=[^>]*>"))
+            {
+                var end = html.IndexOf("</form>", form.Index, StringComparison.Ordinal);
+                if (!html[form.Index..end].Contains("AntiForgeryToken"))
+                    missing.Add($"{Path.GetFileName(file)}: {form.Value}");
+            }
+        }
+        Assert.True(views.Length > 20);
+        Assert.Empty(missing);
+    }
+}
+
 // The cart must only ever touch the signed-in user's own rows.
 public class CartOwnershipTests
 {

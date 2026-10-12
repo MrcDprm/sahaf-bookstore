@@ -43,6 +43,7 @@
         @if (staff)
         {
             <form method="post" action="/Admin/Order/UpdateDetails" class="panel form" novalidate>
+                @Html.AntiForgeryToken()
                 <h2>@T["summary.shipping"]</h2>
                 <input type="hidden" asp-for="OrderHeader.Id" />
                 <div class="form__grid">
