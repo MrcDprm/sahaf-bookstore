@@ -105,6 +105,7 @@ builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<OrderEmails>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
