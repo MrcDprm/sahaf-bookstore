@@ -106,7 +106,7 @@ public class AccountController(
         var result = await userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
+            foreach (var error in result.Errors.DistinctBy(e => e.Description))
                 ModelState.AddModelError(error.Code.StartsWith("Password") ? nameof(model.Password) : "", error.Description);
             return View(FillLists(model));
         }
@@ -187,7 +187,7 @@ public class AccountController(
             var result = await userManager.ResetPasswordAsync(user, Decode(model.Code), model.Password);
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
+                foreach (var error in result.Errors.DistinctBy(e => e.Description))
                     ModelState.AddModelError(error.Code.StartsWith("Password") ? nameof(model.Password) : "", error.Description);
                 return View(model);
             }
@@ -252,7 +252,7 @@ public class AccountController(
         var result = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
+            foreach (var error in result.Errors.DistinctBy(e => e.Description))
                 ModelState.AddModelError(error.Code == "PasswordMismatch" ? nameof(model.OldPassword) : nameof(model.NewPassword), error.Description);
             return View(model);
         }

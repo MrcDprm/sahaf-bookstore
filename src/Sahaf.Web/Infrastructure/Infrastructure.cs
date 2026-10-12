@@ -74,6 +74,7 @@ public class LocalizedIdentityErrorDescriber(IStringLocalizer<SharedResource> t)
 
     public override IdentityError DefaultError() => E(nameof(DefaultError));
     public override IdentityError DuplicateEmail(string email) => E(nameof(DuplicateEmail), email);
+    // The user name is the e-mail, so both errors show one message (de-duplicated in the controller).
     public override IdentityError DuplicateUserName(string userName) => E(nameof(DuplicateEmail), userName);
     public override IdentityError InvalidEmail(string? email) => E(nameof(InvalidEmail), email ?? "");
     public override IdentityError InvalidUserName(string? userName) => E(nameof(InvalidEmail), userName ?? "");
