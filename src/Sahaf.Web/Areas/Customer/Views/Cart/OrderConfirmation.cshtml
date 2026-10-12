@@ -1,0 +1,32 @@
+@model OrderHeader
+@{
+    bool paid = ViewBag.Paid;
+    var delayed = Model.PaymentStatus == SD.PaymentStatusDelayedPayment;
+    ViewData["Title"] = paid ? T["confirm.title"] : T["confirm.pendingTitle"];
+}
+<section class="empty-state confirm">
+    <svg class="notice-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="/favicon.svg#mark" /></svg>
+    @if (paid)
+    {
+        <p class="eyebrow">@T["confirm.number", Model.Number]</p>
+        <h1>@T["confirm.title"]</h1>
+        <p>@(delayed ? T["confirm.delayedText", Model.PaymentDueDate.HasValue ? Culture.Date(Model.PaymentDueDate.Value) : ""] : T["confirm.text"])</p>
+        <div class="confirm__actions">
+            <a class="btn" href="/Admin/Order/Details/@Model.Id">@T["confirm.viewOrder"]</a>
+            <a class="btn btn--ghost" href="/Customer/Home/Catalog">@T["confirm.continue"]</a>
+        </div>
+    }
+    else if (Model.OrderStatus == SD.StatusCancelled)
+    {
+        <h1>@T["confirm.cancelledTitle"]</h1>
+        <p>@T["confirm.cancelledText"]</p>
+        <a class="btn" href="/Customer/Cart">@T["nav.cart"]</a>
+    }
+    else
+    {
+        <p class="eyebrow">@T["confirm.number", Model.Number]</p>
+        <h1>@T["confirm.pendingTitle"]</h1>
+        <p>@T["confirm.pendingText"]</p>
+        <a class="btn" href="/Customer/Cart/OrderConfirmation/@Model.Id">@T["confirm.refresh"]</a>
+    }
+</section>

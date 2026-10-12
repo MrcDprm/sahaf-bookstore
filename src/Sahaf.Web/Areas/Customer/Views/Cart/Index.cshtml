@@ -1,0 +1,74 @@
+@model ShoppingCartVM
+@{
+    ViewData["Title"] = T["nav.cart"];
+    var english = Culture.IsEnglish;
+}
+
+<h1 class="page-title">@T["nav.cart"]</h1>
+
+@if (Model.ShoppingCartList.Count == 0)
+{
+    <div class="empty-state">
+        <svg class="notice-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="/favicon.svg#mark" /></svg>
+        <h2>@T["cart.emptyTitle"]</h2>
+        <p>@T["cart.emptyText"]</p>
+        <a class="btn" href="/Customer/Home/Catalog">@T["home.ctaCatalog"]</a>
+    </div>
+}
+else
+{
+    <div class="cart">
+        <ul class="cart__list">
+            @foreach (var c in Model.ShoppingCartList)
+            {
+                var title = c.Product.LocalTitle(english);
+                <li class="cart-row">
+                    <a class="cart-row__cover" href="/Customer/Home/Details/@c.ProductId">
+                        <img src="@Covers.Url(c.Product)" alt="@T["book.coverAlt", title]" width="80" height="120" loading="lazy" />
+                    </a>
+                    <div class="cart-row__info">
+                        <h2 class="cart-row__title"><a href="/Customer/Home/Details/@c.ProductId">@title</a></h2>
+                        <p class="muted">@c.Product.Author</p>
+                        <p class="cart-row__unit">
+                            @T["cart.unit", Culture.Money(c.Price)]
+                            @if (c.Price < c.Product.Price)
+                            {
+                                <span class="tag">@T["cart.bulkApplied"]</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="cart-row__qty">
+                        <form method="post" action="/Customer/Cart/Minus">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cartId" value="@c.Id" />
+                            <button class="qty-btn" type="submit" aria-label="@T["cart.decrease"]: @title">−</button>
+                        </form>
+                        <span class="qty-value" aria-label="@T["field.count"]">@c.Count</span>
+                        <form method="post" action="/Customer/Cart/Plus">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cartId" value="@c.Id" />
+                            <button class="qty-btn" type="submit" aria-label="@T["cart.increase"]: @title" disabled="@(c.Count >= PriceCalculator.MaxCount)">+</button>
+                        </form>
+                    </div>
+                    <p class="cart-row__total">@Culture.Money(c.Price * c.Count)</p>
+                    <form method="post" action="/Customer/Cart/Remove" class="cart-row__remove">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="cartId" value="@c.Id" />
+                        <button class="link-btn" type="submit">@T["cart.remove"]</button>
+                    </form>
+                </li>
+            }
+        </ul>
+
+        <aside class="receipt">
+            <h2 class="receipt__title">@T["cart.summary"]</h2>
+            <dl class="receipt__lines">
+                <div><dt>@T["cart.items", Model.ShoppingCartList.Sum(c => c.Count)]</dt><dd>@Culture.Money(Model.OrderHeader.OrderTotal)</dd></div>
+                <div><dt>@T["cart.shipping"]</dt><dd>@T["cart.free"]</dd></div>
+            </dl>
+            <p class="receipt__total"><span>@T["cart.total"]</span><strong>@Culture.Money(Model.OrderHeader.OrderTotal)</strong></p>
+            <a class="btn btn--wide" href="/Customer/Cart/Summary">@T["cart.checkout"]</a>
+            <p class="receipt__note">@T["cart.bulkNote"]</p>
+        </aside>
+    </div>
+}

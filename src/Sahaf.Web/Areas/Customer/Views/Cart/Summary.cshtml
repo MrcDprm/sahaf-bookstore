@@ -1,0 +1,53 @@
+@model ShoppingCartVM
+@{
+    ViewData["Title"] = T["summary.title"];
+    var english = Culture.IsEnglish;
+}
+
+<nav class="breadcrumb" aria-label="@T["details.breadcrumb"]">
+    <a href="/Customer/Cart">@T["nav.cart"]</a>
+    <span aria-hidden="true">/</span>
+    <span>@T["summary.title"]</span>
+</nav>
+<h1 class="page-title">@T["summary.title"]</h1>
+
+<form method="post" class="cart" novalidate>
+    <section class="panel form">
+        <h2>@T["summary.shipping"]</h2>
+        <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+        <div class="form__grid">
+            <field asp-for="OrderHeader.Name" autocomplete="name" />
+            <field asp-for="OrderHeader.PhoneNumber" type="tel" autocomplete="tel" />
+        </div>
+        <field asp-for="OrderHeader.StreetAddress" autocomplete="street-address" />
+        <div class="form__grid form__grid--3">
+            <field asp-for="OrderHeader.City" autocomplete="address-level1" />
+            <field asp-for="OrderHeader.State" autocomplete="address-level2" />
+            <field asp-for="OrderHeader.PostalCode" autocomplete="postal-code" />
+        </div>
+    </section>
+
+    <aside class="receipt">
+        <h2 class="receipt__title">@T["cart.summary"]</h2>
+        <ul class="receipt__items">
+            @foreach (var c in Model.ShoppingCartList)
+            {
+                <li>
+                    <span>@c.Count × @c.Product.LocalTitle(english)</span>
+                    <span>@Culture.Money(c.Price * c.Count)</span>
+                </li>
+            }
+        </ul>
+        <p class="receipt__total"><span>@T["cart.total"]</span><strong>@Culture.Money(Model.OrderHeader.OrderTotal)</strong></p>
+        @if (Model.IsCompanyUser)
+        {
+            <p class="receipt__note">@T["summary.companyNote", SD.CompanyPaymentTermDays]</p>
+            <button class="btn btn--wide" type="submit">@T["summary.placeOrder"]</button>
+        }
+        else
+        {
+            <p class="receipt__note">@T["summary.stripeNote"]</p>
+            <button class="btn btn--wide" type="submit">@T["summary.pay"]</button>
+        }
+    </aside>
+</form>
