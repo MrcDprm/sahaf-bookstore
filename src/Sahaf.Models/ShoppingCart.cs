@@ -4,7 +4,8 @@ namespace Sahaf.Models;
 
 public class ShoppingCart
 {
-    public int Id { get; set; }
+    // Guid: cart row ids are posted from the cart page and must not be guessable.
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public int ProductId { get; set; }
     public Product Product { get; set; } = null!;
