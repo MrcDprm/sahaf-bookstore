@@ -1,4 +1,7 @@
 using System.Globalization;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using Microsoft.Extensions.WebEncoders;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -67,6 +70,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = cultures;
     options.RequestCultureProviders = [new CookieRequestCultureProvider(), new AcceptLanguageHeaderRequestCultureProvider()];
 });
+
+// Razor encodes everything outside Basic Latin by default ("ı" becomes &#x131;).
+// Allowing all ranges keeps Turkish text readable; <, >, & and quotes are still encoded.
+builder.Services.Configure<WebEncoderOptions>(options =>
+    options.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
 
 builder.Services.AddControllersWithViews(options =>
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
