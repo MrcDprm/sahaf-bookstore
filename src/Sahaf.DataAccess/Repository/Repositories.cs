@@ -20,26 +20,8 @@ public class CategoryRepository(ApplicationDbContext db) : Repository<Category>(
 
 public class ProductRepository(ApplicationDbContext db) : Repository<Product>(db), IProductRepository
 {
-    // CreatedAt, CoverImageId and the images can never come from a posted form.
-    public void Update(Product product)
-    {
-        var fromDb = Db.Products.FirstOrDefault(p => p.Id == product.Id);
-        if (fromDb == null) return;
-        fromDb.Title = product.Title;
-        fromDb.TitleEn = product.TitleEn;
-        fromDb.Author = product.Author;
-        fromDb.Description = product.Description;
-        fromDb.DescriptionEn = product.DescriptionEn;
-        fromDb.ISBN = product.ISBN;
-        fromDb.PageCount = product.PageCount;
-        fromDb.Year = product.Year;
-        fromDb.ListPrice = product.ListPrice;
-        fromDb.Price = product.Price;
-        fromDb.Price50 = product.Price50;
-        fromDb.Price100 = product.Price100;
-        fromDb.IsFeatured = product.IsFeatured;
-        fromDb.CategoryId = product.CategoryId;
-    }
+    public void Update(Product product) =>
+        Db.Products.FirstOrDefault(p => p.Id == product.Id)?.CopyEditableFrom(product);
 }
 
 public class ProductImageRepository(ApplicationDbContext db) : Repository<ProductImage>(db), IProductImageRepository;

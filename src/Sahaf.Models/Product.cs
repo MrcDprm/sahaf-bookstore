@@ -88,6 +88,26 @@ public class Product
     public string LocalDescription(bool english) =>
         english && !string.IsNullOrWhiteSpace(DescriptionEn) ? DescriptionEn : Description;
 
+    // The fields an admin may edit. Id, CreatedAt, CoverImageId and the
+    // images are never copied from a posted form (no overposting).
+    public void CopyEditableFrom(Product other)
+    {
+        Title = other.Title.Trim();
+        TitleEn = other.TitleEn?.Trim();
+        Author = other.Author.Trim();
+        Description = other.Description.Trim();
+        DescriptionEn = other.DescriptionEn?.Trim();
+        ISBN = other.ISBN?.Trim();
+        PageCount = other.PageCount;
+        Year = other.Year;
+        ListPrice = other.ListPrice;
+        Price = other.Price;
+        Price50 = other.Price50;
+        Price100 = other.Price100;
+        IsFeatured = other.IsFeatured;
+        CategoryId = other.CategoryId;
+    }
+
     public int DiscountPercent =>
         ListPrice > Price ? (int)Math.Round((ListPrice - Price) / ListPrice * 100) : 0;
 }
