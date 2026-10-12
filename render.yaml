@@ -1,0 +1,29 @@
+# Render Blueprint: creates the web service from the Dockerfile.
+# Secrets are marked "sync: false"; Render asks for their values once and
+# they never enter the repository.
+services:
+  - type: web
+    name: sahaf
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: Admin__Email
+        sync: false
+      - key: Admin__Password
+        sync: false
+      - key: Stripe__SecretKey
+        sync: false
+      - key: Stripe__WebhookSecret
+        sync: false
+      - key: Email__ResendApiKey
+        sync: false
+      - key: Email__From
+        value: "Sahaf <no-reply@miracdeprem.com>"
+      - key: AllowedHosts
+        value: "sahaf.miracdeprem.com;sahaf.onrender.com"
