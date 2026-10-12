@@ -352,5 +352,8 @@
   "user.notSelf": "Kendi hesabınızda bu işlemi yapamazsınız.",
   "user.you": "Siz",
   "user.companyHint": "Sadece Kurum rolü için.",
-  "user.reloginNote": "Rol değişince kullanıcının oturumu kapanır; yeni yetkiler bir sonraki girişte geçerli olur."
+  "user.reloginNote": "Rol değişince kullanıcının oturumu kapanır; yeni yetkiler bir sonraki girişte geçerli olur.",
+  "footer.projects": "Projelerim",
+  "footer.portfolio": "Portfolyo",
+  "footer.source": "Kaynak kodu"
 }

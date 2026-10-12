@@ -410,14 +410,24 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 .prose li { margin-bottom: .4em; }
 
 /* ---------- Footer ---------- */
-.site-footer { border-top: 1px solid var(--line); padding: 40px 0; background: var(--paper-2); }
+.site-footer { border-top: 1px solid var(--line); padding: 40px 0 28px; background: var(--paper-2); }
 .site-footer__inner { display: grid; gap: 20px; }
-@media (min-width: 800px) { .site-footer__inner { grid-template-columns: 1fr auto; } .site-footer__inner > .small { grid-column: 1 / -1; } }
+@media (min-width: 800px) { .site-footer__inner { grid-template-columns: 1fr auto; } }
 .brand--footer .brand__name { font-size: 1.25rem; }
 .site-footer p { margin: 8px 0 0; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: start; }
 .footer-links a { color: var(--ink-2); text-decoration: none; }
 .footer-links a:hover { color: var(--ink); text-decoration: underline; }
+/* Same look as the footers of the other live projects: one centred mono row. */
+.site-footer__bottom {
+  display: grid; justify-items: center; gap: 10px; margin-top: 28px; padding-top: 20px;
+  border-top: 1px solid var(--line); font: .8rem/1.5 var(--font-mono); color: var(--ink-3); text-align: center;
+}
+.footer-projects, .footer-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; }
+.footer-projects a, .footer-meta a { color: var(--ink-2); text-decoration: none; }
+.footer-projects a:hover, .footer-meta a:hover { color: var(--accent); text-decoration: underline; }
+.footer-projects [aria-current="page"] { color: var(--ink); font-weight: 600; pointer-events: none; }
+.site-footer__bottom p { margin: 0; font-family: var(--font-body); }
 
 /* ---------- Forms ---------- */
 .form { display: grid; gap: 18px; }
