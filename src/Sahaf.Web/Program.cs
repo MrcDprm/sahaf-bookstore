@@ -54,6 +54,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
+// The cookie's security stamp is checked on every request (default: every
+// 30 minutes), so locking a user or changing a role takes effect at once.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+    options.ValidationInterval = TimeSpan.Zero);
 builder.Services.AddDataProtection()
     .SetApplicationName("Sahaf")
     .PersistKeysToDbContext<ApplicationDbContext>();
