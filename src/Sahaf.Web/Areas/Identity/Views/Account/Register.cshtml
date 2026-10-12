@@ -1,0 +1,33 @@
+@model RegisterVM
+@{
+    var byAdmin = User.IsInRole(SD.Role_Admin);
+    ViewData["Title"] = byAdmin ? T["account.createUser"] : T["account.register"];
+}
+<div class="auth">
+    <section class="auth__card">
+        <p class="eyebrow">@T["account.registerEyebrow"]</p>
+        <h1>@ViewData["Title"]</h1>
+        <form method="post" class="form" novalidate>
+            <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+            <field asp-for="Name" autocomplete="name" />
+            <field asp-for="Email" type="email" autocomplete="email" />
+            <field asp-for="Password" type="password" autocomplete="new-password" hint="@T["account.passwordHint"]" />
+            <field asp-for="ConfirmPassword" type="password" autocomplete="new-password" />
+            @if (byAdmin)
+            {
+                <div class="form__grid">
+                    <field asp-for="Role" type="select" items="Model.RoleList" option-label="@T["role.Customer"]" />
+                    <field asp-for="CompanyId" type="select" items="Model.CompanyList" option-label="—" />
+                </div>
+            }
+            <button class="btn btn--wide" type="submit">@ViewData["Title"]</button>
+        </form>
+        @if (!byAdmin)
+        {
+            <p class="auth__alt">@T["account.haveAccount"] <a href="/Identity/Account/Login">@T["nav.login"]</a></p>
+        }
+    </section>
+    <aside class="auth__aside" aria-hidden="true">
+        <p>@T["account.asideRegister"]</p>
+    </aside>
+</div>

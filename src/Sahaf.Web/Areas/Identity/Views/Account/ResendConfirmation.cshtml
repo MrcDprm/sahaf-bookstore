@@ -1,0 +1,12 @@
+@model EmailVM
+@{
+    ViewData["Title"] = T["account.resend"];
+}
+<section class="auth__card auth__card--solo">
+    <h1>@T["account.resend"]</h1>
+    <p class="muted">@T["account.resendText"]</p>
+    <form method="post" class="form" novalidate>
+        <field asp-for="Email" type="email" autocomplete="email" />
+        <button class="btn btn--wide" type="submit">@T["account.send"]</button>
+    </form>
+</section>

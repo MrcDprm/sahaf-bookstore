@@ -1,0 +1,15 @@
+@model DeleteAccountVM
+@{
+    ViewData["Title"] = T["account.deleteTitle"];
+}
+<div class="page-narrow">
+    <h1>@T["nav.account"]</h1>
+    <partial name="_AccountNav" />
+    <form method="post" class="form panel panel--danger" novalidate data-confirm="@T["account.deleteConfirm"]">
+        <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+        <h2>@T["account.deleteTitle"]</h2>
+        <p>@T["account.deleteText"]</p>
+        <field asp-for="Password" type="password" autocomplete="current-password" />
+        <button class="btn btn--danger" type="submit">@T["account.deleteButton"]</button>
+    </form>
+</div>

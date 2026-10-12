@@ -1,0 +1,29 @@
+@model LoginVM
+@{
+    ViewData["Title"] = T["nav.login"];
+}
+<div class="auth">
+    <section class="auth__card">
+        <p class="eyebrow">@T["account.welcome"]</p>
+        <h1>@T["nav.login"]</h1>
+        <form method="post" class="form" novalidate>
+            <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+            <input type="hidden" asp-for="ReturnUrl" />
+            <field asp-for="Email" type="email" autocomplete="email" />
+            <field asp-for="Password" type="password" autocomplete="current-password" />
+            <div class="form__row">
+                <field asp-for="RememberMe" type="checkbox" />
+                <a href="/Identity/Account/ForgotPassword">@T["account.forgot"]</a>
+            </div>
+            <button class="btn btn--wide" type="submit">@T["nav.login"]</button>
+        </form>
+        @if (ViewBag.ShowResend == true)
+        {
+            <p class="auth__alt"><a href="/Identity/Account/ResendConfirmation">@T["account.resend"]</a></p>
+        }
+        <p class="auth__alt">@T["account.noAccount"] <a href="/Identity/Account/Register">@T["account.register"]</a></p>
+    </section>
+    <aside class="auth__aside" aria-hidden="true">
+        <p>@T["account.asideQuote"]</p>
+    </aside>
+</div>

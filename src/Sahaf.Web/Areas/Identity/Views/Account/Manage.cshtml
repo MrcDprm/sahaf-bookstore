@@ -1,0 +1,23 @@
+@model ProfileVM
+@{
+    ViewData["Title"] = T["nav.profile"];
+}
+<div class="page-narrow">
+    <h1>@T["nav.account"]</h1>
+    <partial name="_AccountNav" />
+    <form method="post" class="form panel" novalidate>
+        <p class="muted">@T["field.email"]: <strong>@Model.Email</strong></p>
+        <div class="form__grid">
+            <field asp-for="Name" autocomplete="name" />
+            <field asp-for="PhoneNumber" type="tel" autocomplete="tel" />
+        </div>
+        <p class="muted small">@T["account.addressHint"]</p>
+        <field asp-for="StreetAddress" autocomplete="street-address" />
+        <div class="form__grid form__grid--3">
+            <field asp-for="City" autocomplete="address-level1" />
+            <field asp-for="State" autocomplete="address-level2" />
+            <field asp-for="PostalCode" autocomplete="postal-code" />
+        </div>
+        <button class="btn" type="submit">@T["common.save"]</button>
+    </form>
+</div>

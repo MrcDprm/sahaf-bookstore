@@ -1,0 +1,13 @@
+@model NoticeVM
+@{
+    ViewData["Title"] = Model.Title;
+}
+<section class="empty-state">
+    <svg class="notice-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="/favicon.svg#mark" /></svg>
+    <h1>@Model.Title</h1>
+    <p>@Model.Text</p>
+    @if (Model.LinkUrl != null)
+    {
+        <a class="btn" href="@Model.LinkUrl">@Model.LinkText</a>
+    }
+</section>

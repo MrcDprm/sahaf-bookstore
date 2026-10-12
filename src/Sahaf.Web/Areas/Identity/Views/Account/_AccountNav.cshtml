@@ -1,0 +1,9 @@
+@{
+    var action = ViewContext.RouteData.Values["action"] as string;
+}
+<nav class="tabs" aria-label="@T["nav.account"]">
+    <a href="/Identity/Account/Manage" aria-current="@(action == "Manage" ? "page" : null)">@T["nav.profile"]</a>
+    <a href="/Identity/Account/ChangePassword" aria-current="@(action == "ChangePassword" ? "page" : null)">@T["account.changePassword"]</a>
+    <a href="/Admin/Order">@T["nav.myOrders"]</a>
+    <a href="/Identity/Account/Delete" aria-current="@(action == "Delete" ? "page" : null)">@T["account.deleteTitle"]</a>
+</nav>
