@@ -5,4 +5,7 @@
     <Project Path="src/Sahaf.Utility/Sahaf.Utility.csproj" />
     <Project Path="src/Sahaf.Web/Sahaf.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sahaf.Tests/Sahaf.Tests.csproj" />
+  </Folder>
 </Solution>
