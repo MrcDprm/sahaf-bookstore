@@ -1,0 +1,13 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"] as string;
+}
+<nav class="tabs" aria-label="@T["nav.admin"]">
+    <a href="/Admin/Order" aria-current="@(controller == "Order" ? "page" : null)">@T["nav.orders"]</a>
+    @if (User.IsInRole(SD.Role_Admin))
+    {
+        <a href="/Admin/Product" aria-current="@(controller == "Product" ? "page" : null)">@T["nav.products"]</a>
+        <a href="/Admin/Category" aria-current="@(controller == "Category" ? "page" : null)">@T["nav.categories"]</a>
+        <a href="/Admin/Company" aria-current="@(controller == "Company" ? "page" : null)">@T["nav.companies"]</a>
+        <a href="/Admin/User" aria-current="@(controller == "User" ? "page" : null)">@T["nav.users"]</a>
+    }
+</nav>

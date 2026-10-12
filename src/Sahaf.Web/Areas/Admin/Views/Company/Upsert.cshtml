@@ -1,0 +1,25 @@
+@model Company
+@{
+    ViewData["Title"] = Model.Id == 0 ? T["admin.newCompany"] : T["admin.editCompany"];
+}
+<partial name="_AdminNav" />
+<div class="page-narrow">
+    <h1>@ViewData["Title"]</h1>
+    <form method="post" class="form panel" novalidate>
+        <input type="hidden" asp-for="Id" />
+        <div class="form__grid">
+            <field asp-for="Name" />
+            <field asp-for="PhoneNumber" type="tel" />
+        </div>
+        <field asp-for="StreetAddress" />
+        <div class="form__grid form__grid--3">
+            <field asp-for="City" />
+            <field asp-for="State" />
+            <field asp-for="PostalCode" />
+        </div>
+        <div class="form__actions">
+            <button class="btn" type="submit">@T["common.save"]</button>
+            <a class="btn btn--ghost" href="/Admin/Company">@T["admin.back"]</a>
+        </div>
+    </form>
+</div>

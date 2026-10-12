@@ -1,0 +1,20 @@
+@model Category
+@{
+    ViewData["Title"] = Model.Id == 0 ? T["admin.newCategory"] : T["admin.editCategory"];
+}
+<partial name="_AdminNav" />
+<div class="page-narrow">
+    <h1>@ViewData["Title"]</h1>
+    <form method="post" class="form panel" novalidate>
+        <input type="hidden" asp-for="Id" />
+        <div class="form__grid">
+            <field asp-for="Name" />
+            <field asp-for="NameEn" />
+        </div>
+        <field asp-for="DisplayOrder" type="number" />
+        <div class="form__actions">
+            <button class="btn" type="submit">@T["common.save"]</button>
+            <a class="btn btn--ghost" href="/Admin/Category">@T["admin.back"]</a>
+        </div>
+    </form>
+</div>

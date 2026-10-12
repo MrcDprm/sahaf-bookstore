@@ -1,0 +1,108 @@
+@model ProductVM
+@using Sahaf.Web.Areas.Admin.Controllers
+@{
+    var p = Model.Product;
+    ViewData["Title"] = p.Id == 0 ? T["admin.newProduct"] : T["admin.editProduct"];
+    var hasImages = Model.ImageIds.Count > 0;
+}
+<partial name="_AdminNav" />
+<header class="admin-head">
+    <h1>@ViewData["Title"]</h1>
+    @if (p.Id != 0)
+    {
+        <a class="link-arrow" href="/Customer/Home/Details/@p.Id">@T["admin.viewInStore"]</a>
+    }
+</header>
+
+<div class="editor">
+    <form method="post" enctype="multipart/form-data" class="form panel" novalidate id="product-form">
+        <div asp-validation-summary="ModelOnly" class="form-errors"></div>
+        <input type="hidden" asp-for="Product.Id" />
+        <div class="form__grid">
+            <field asp-for="Product.Title" />
+            <field asp-for="Product.TitleEn" />
+        </div>
+        <div class="form__grid">
+            <field asp-for="Product.Author" />
+            <field asp-for="Product.CategoryId" type="select" items="Model.CategoryList" option-label="—" />
+        </div>
+        <field asp-for="Product.Description" type="textarea" rows="4" />
+        <field asp-for="Product.DescriptionEn" type="textarea" rows="4" />
+        <div class="form__grid form__grid--3">
+            <field asp-for="Product.Year" type="number" />
+            <field asp-for="Product.PageCount" type="number" />
+            <field asp-for="Product.ISBN" />
+        </div>
+        <fieldset class="fieldset">
+            <legend>@T["admin.prices"]</legend>
+            <div class="form__grid form__grid--4">
+                <field asp-for="Product.ListPrice" type="decimal" />
+                <field asp-for="Product.Price" type="decimal" />
+                <field asp-for="Product.Price50" type="decimal" />
+                <field asp-for="Product.Price100" type="decimal" />
+            </div>
+        </fieldset>
+        <field asp-for="Product.IsFeatured" type="checkbox" />
+
+        <div class="field">
+            <label class="field__label" for="files">@T["admin.uploadImages"]</label>
+            <input class="input" id="files" name="files" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="files-hint" />
+            <small class="field__hint" id="files-hint">@T["admin.uploadHint", ProductController.MaxFilesPerUpload, ProductController.MaxImages]</small>
+            <span class="field__error">@Html.ValidationMessage("files")</span>
+        </div>
+
+        <div class="form__actions">
+            <button class="btn" type="submit">@T["common.save"]</button>
+            <a class="btn btn--ghost" href="/Admin/Product">@T["admin.back"]</a>
+        </div>
+    </form>
+
+    <aside class="panel editor__side">
+        <h2>@T["admin.cover"]</h2>
+        @if (p.Id != 0)
+        {
+            <img class="editor__cover" src="@Covers.Url(p)" alt="" width="400" height="600" />
+            @if (p.CoverImageId != null)
+            {
+                <form method="post" action="/Admin/Product/UseGeneratedCover/@p.Id">
+                    @Html.AntiForgeryToken()
+                    <button class="link-btn" type="submit">@T["admin.useGenerated"]</button>
+                </form>
+            }
+        }
+        else
+        {
+            <p class="muted small">@T["admin.coverHint"]</p>
+        }
+
+        @if (hasImages)
+        {
+            <h3>@T["admin.images"]</h3>
+            <ul class="image-list">
+                @foreach (var id in Model.ImageIds)
+                {
+                    <li>
+                        <img src="/img/@id" alt="" width="64" height="96" loading="lazy" />
+                        <div>
+                            @if (p.CoverImageId == id)
+                            {
+                                <span class="tag">@T["admin.isCover"]</span>
+                            }
+                            else
+                            {
+                                <form method="post" action="/Admin/Product/SetCover/@id">
+                                    @Html.AntiForgeryToken()
+                                    <button class="link-btn" type="submit">@T["admin.makeCover"]</button>
+                                </form>
+                            }
+                            <form method="post" action="/Admin/Product/DeleteImage/@id" data-confirm="@T["admin.confirmDeleteImage"]">
+                                @Html.AntiForgeryToken()
+                                <button class="link-btn" type="submit">@T["admin.delete"]</button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </aside>
+</div>

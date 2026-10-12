@@ -9,6 +9,19 @@ public class ProductVM
 
     [ValidateNever]
     public IEnumerable<SelectListItem> CategoryList { get; set; } = [];
+
+    [ValidateNever]
+    public IReadOnlyList<Guid> ImageIds { get; set; } = [];
+}
+
+public class AdminListVM<T>
+{
+    public IReadOnlyList<T> Items { get; set; } = [];
+    public string? Query { get; set; }
+    public int? CategoryId { get; set; }
+    public int Page { get; set; } = 1;
+    public int TotalPages { get; set; } = 1;
+    public int TotalCount { get; set; }
 }
 
 public class ShoppingCartVM
