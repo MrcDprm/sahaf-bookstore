@@ -1,0 +1,11 @@
+@{
+    int code = ViewBag.Code;
+    var key = code is 404 or 403 or 429 ? $"error.{code}" : "error";
+    ViewData["Title"] = T[key + ".title"];
+}
+<section class="empty-state">
+    <p class="empty-state__code">@code</p>
+    <h1>@T[key + ".title"]</h1>
+    <p>@T[code is 404 or 429 ? key + ".text" : "error.text"]</p>
+    <a class="btn" href="/">@T["error.home"]</a>
+</section>

@@ -3,5 +3,6 @@
     <Project Path="src/Sahaf.DataAccess/Sahaf.DataAccess.csproj" />
     <Project Path="src/Sahaf.Models/Sahaf.Models.csproj" />
     <Project Path="src/Sahaf.Utility/Sahaf.Utility.csproj" />
+    <Project Path="src/Sahaf.Web/Sahaf.Web.csproj" />
   </Folder>
 </Solution>
