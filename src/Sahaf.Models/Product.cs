@@ -78,6 +78,10 @@ public class Product
     [ValidateNever]
     public List<ProductImage> Images { get; set; } = [];
 
+    // First uploaded image, kept here so lists can show it without loading
+    // image bytes. Null means the generated cover is used.
+    public Guid? CoverImageId { get; set; }
+
     public string LocalTitle(bool english) =>
         english && !string.IsNullOrWhiteSpace(TitleEn) ? TitleEn : Title;
 
