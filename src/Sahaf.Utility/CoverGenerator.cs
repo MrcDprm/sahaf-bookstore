@@ -132,5 +132,14 @@ public static class CoverGenerator
 
     private static string Escape(string s) => SecurityElement.Escape(s) ?? "";
 
-    private static int Index(int seed, int length) => (int)((uint)(seed * 2654435761u) % (uint)length);
+    // Integer hash (lowbias32): neighbouring or evenly spaced ids still get
+    // unrelated palettes, which a plain "id % length" would not.
+    private static int Index(int seed, int length)
+    {
+        var h = (uint)seed;
+        h ^= h >> 16; h *= 0x7feb352d;
+        h ^= h >> 15; h *= 0x846ca68b;
+        h ^= h >> 16;
+        return (int)(h % (uint)length);
+    }
 }
