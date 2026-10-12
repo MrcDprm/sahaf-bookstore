@@ -1,0 +1,125 @@
+@model HomeVM
+@{
+    ViewData["Title"] = T["home.title"];
+    var english = Culture.IsEnglish;
+}
+
+<section class="hero">
+    <div class="hero__text">
+        <p class="eyebrow">@T["home.eyebrow", Model.BookCount]</p>
+        <h1 class="display">@T["home.headline1"]<br /><em>@T["home.headline2"]</em></h1>
+        <p class="lead">@T["home.lead"]</p>
+        <div class="hero__actions">
+            <a class="btn" href="/Customer/Home/Catalog">@T["home.ctaCatalog"]</a>
+            <a class="btn btn--ghost" href="#picks">@T["home.ctaPicks"]</a>
+        </div>
+        <dl class="stats">
+            <div><dt>@T["home.statBooks"]</dt><dd>@Model.BookCount</dd></div>
+            <div><dt>@T["home.statAuthors"]</dt><dd>@Model.AuthorCount</dd></div>
+            <div><dt>@T["home.statCategories"]</dt><dd>@Model.Categories.Count</dd></div>
+        </dl>
+    </div>
+
+    <div class="shelf" aria-label="@T["home.shelf"]">
+        <div class="shelf__row">
+            @foreach (var p in Model.Shelf)
+            {
+                var size = p.PageCount switch { > 600 => "xl", > 300 => "l", > 150 => "m", _ => "s" };
+                <a class="spine spine--@size spine--h@(p.Id % 4)" href="/Customer/Home/Details/@p.Id"
+                   data-bg="@Covers.Background(p)" data-fg="@Covers.Ink(p)" data-accent="@Covers.Accent(p)"
+                   title="@p.LocalTitle(english) · @p.Author">
+                    <span class="spine__title">@p.LocalTitle(english)</span>
+                    <span class="spine__author">@p.Author.Split(' ').Last()</span>
+                </a>
+            }
+        </div>
+        <div class="shelf__plank" aria-hidden="true"></div>
+    </div>
+</section>
+
+<section class="section">
+    <header class="section__head">
+        <h2>@T["home.categories"]</h2>
+        <a class="link-arrow" href="/Customer/Home/Catalog">@T["home.seeAll"]</a>
+    </header>
+    <ul class="category-grid">
+        @for (var i = 0; i < Model.Categories.Count; i++)
+        {
+            var c = Model.Categories[i];
+            <li>
+                <a class="category-tile" href="/Customer/Home/Catalog?categoryId=@c.Category.Id">
+                    <span class="category-tile__no">@((i + 1).ToString("00"))</span>
+                    <span class="category-tile__name">@c.Category.LocalName(english)</span>
+                    <span class="category-tile__count">@T["home.bookCount", c.Count]</span>
+                </a>
+            </li>
+        }
+    </ul>
+</section>
+
+<section class="section" id="picks">
+    <header class="section__head">
+        <div>
+            <h2>@T["home.picks"]</h2>
+            <p class="muted">@T["home.picksText"]</p>
+        </div>
+    </header>
+    <div class="scroller">
+        @foreach (var p in Model.Featured)
+        {
+            <partial name="_BookCard" model="p" />
+        }
+    </div>
+</section>
+
+<section class="quote">
+    <blockquote>
+        <p>@T["home.quote"]</p>
+        <footer>— Jane Austen, <cite>@T["home.quoteSource"]</cite></footer>
+    </blockquote>
+</section>
+
+@if (Model.Deals.Count > 0)
+{
+    <section class="section deals">
+        <header class="section__head">
+            <div>
+                <h2>@T["home.deals"]</h2>
+                <p class="muted">@T["home.dealsText"]</p>
+            </div>
+            <a class="link-arrow" href="/Customer/Home/Catalog?sort=discount">@T["home.seeAll"]</a>
+        </header>
+        <div class="book-grid book-grid--4">
+            @foreach (var p in Model.Deals)
+            {
+                <partial name="_BookCard" model="p" />
+            }
+        </div>
+    </section>
+}
+
+<section class="section">
+    <header class="section__head">
+        <h2>@T["home.newest"]</h2>
+        <a class="link-arrow" href="/Customer/Home/Catalog?sort=new">@T["home.seeAll"]</a>
+    </header>
+    <div class="book-grid book-grid--4">
+        @foreach (var p in Model.Newest)
+        {
+            <partial name="_BookCard" model="p" />
+        }
+    </div>
+</section>
+
+<section class="b2b">
+    <div>
+        <p class="eyebrow">@T["b2b.eyebrow"]</p>
+        <h2>@T["b2b.title"]</h2>
+        <p>@T["b2b.text", SD.CompanyPaymentTermDays]</p>
+    </div>
+    <ul class="b2b__tiers">
+        <li><strong>1–50</strong><span>@T["b2b.tier1"]</span></li>
+        <li><strong>51–100</strong><span>@T["b2b.tier2"]</span></li>
+        <li><strong>100+</strong><span>@T["b2b.tier3"]</span></li>
+    </ul>
+</section>

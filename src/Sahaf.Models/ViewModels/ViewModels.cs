@@ -53,8 +53,8 @@ public class HomeVM
 public class DetailsVM
 {
     public Product Product { get; set; } = null!;
+    public IReadOnlyList<Guid> ImageIds { get; set; } = [];
     public IReadOnlyList<Product> Related { get; set; } = [];
-    public int Count { get; set; } = 1;
 }
 
 public class UserRow

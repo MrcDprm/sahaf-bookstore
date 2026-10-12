@@ -1,0 +1,25 @@
+@model Product
+@{
+    var english = Culture.IsEnglish;
+    var title = Model.LocalTitle(english);
+}
+<article class="book-card">
+    <a class="book-card__cover" href="/Customer/Home/Details/@Model.Id">
+        <img src="@Covers.Url(Model)" alt="@T["book.coverAlt", title]" width="400" height="600" loading="lazy" decoding="async" />
+        @if (Model.DiscountPercent > 0)
+        {
+            <span class="stamp" aria-label="@T["book.discount", Model.DiscountPercent]">−%@Model.DiscountPercent</span>
+        }
+    </a>
+    <div class="book-card__body">
+        <h3 class="book-card__title"><a href="/Customer/Home/Details/@Model.Id">@title</a></h3>
+        <p class="book-card__author">@Model.Author</p>
+        <p class="price">
+            <span class="price__now">@Culture.Money(Model.Price)</span>
+            @if (Model.ListPrice > Model.Price)
+            {
+                <s class="price__was" aria-label="@T["book.listPrice"]">@Culture.Money(Model.ListPrice)</s>
+            }
+        </p>
+    </div>
+</article>

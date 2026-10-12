@@ -1,0 +1,107 @@
+@model DetailsVM
+@{
+    var english = Culture.IsEnglish;
+    var p = Model.Product;
+    var title = p.LocalTitle(english);
+    ViewData["Title"] = title;
+}
+
+<nav class="breadcrumb" aria-label="@T["details.breadcrumb"]">
+    <a href="/Customer/Home/Catalog">@T["nav.catalog"]</a>
+    <span aria-hidden="true">/</span>
+    <a href="/Customer/Home/Catalog?categoryId=@p.CategoryId">@p.Category.LocalName(english)</a>
+</nav>
+
+<div class="details">
+    <div class="details__media">
+        <div class="book3d" data-bg="@Covers.Background(p)">
+            <img src="@Covers.Url(p)" alt="@T["book.coverAlt", title]" width="400" height="600" />
+        </div>
+        @if (Model.ImageIds.Count > 1)
+        {
+            <ul class="thumbs">
+                @foreach (var id in Model.ImageIds)
+                {
+                    <li><a href="/img/@id" target="_blank" rel="noopener"><img src="/img/@id" alt="" width="64" height="96" loading="lazy" /></a></li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="details__info">
+        <p class="eyebrow">@p.Category.LocalName(english)</p>
+        <h1 class="display display--md">@title</h1>
+        <p class="details__author">@p.Author</p>
+
+        <dl class="facts">
+            @if (p.Year.HasValue)
+            {
+                <div><dt>@T["field.year"]</dt><dd>@Culture.Year(p.Year.Value)</dd></div>
+            }
+            @if (p.PageCount.HasValue)
+            {
+                <div><dt>@T["field.pageCount"]</dt><dd>@p.PageCount</dd></div>
+            }
+            <div><dt>@T["details.series"]</dt><dd>No. @p.Id.ToString("000")</dd></div>
+            @if (!string.IsNullOrEmpty(p.ISBN))
+            {
+                <div><dt>ISBN</dt><dd>@p.ISBN</dd></div>
+            }
+        </dl>
+
+        <p class="details__desc">@p.LocalDescription(english)</p>
+
+        <div class="buy">
+            <div class="buy__price">
+                <span class="price__now price__now--lg">@Culture.Money(p.Price)</span>
+                @if (p.ListPrice > p.Price)
+                {
+                    <s class="price__was">@Culture.Money(p.ListPrice)</s>
+                    <span class="stamp stamp--inline">−%@p.DiscountPercent</span>
+                }
+            </div>
+
+            <table class="tiers">
+                <caption>@T["details.tiers"]</caption>
+                <thead><tr><th scope="col">@T["field.count"]</th><th scope="col">@T["details.unitPrice"]</th></tr></thead>
+                <tbody>
+                    <tr><td>1–50</td><td>@Culture.Money(p.Price)</td></tr>
+                    <tr><td>51–100</td><td>@Culture.Money(p.Price50)</td></tr>
+                    <tr><td>100+</td><td>@Culture.Money(p.Price100)</td></tr>
+                </tbody>
+            </table>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form method="post" action="/Customer/Home/AddToCart" class="buy__form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@p.Id" />
+                    <label for="count">@T["field.count"]</label>
+                    <div class="stepper">
+                        <button type="button" data-step="-1" aria-label="@T["cart.decrease"]">−</button>
+                        <input id="count" name="count" type="number" inputmode="numeric" min="1" max="@PriceCalculator.MaxCount" value="1" required />
+                        <button type="button" data-step="1" aria-label="@T["cart.increase"]">+</button>
+                    </div>
+                    <button class="btn btn--wide" type="submit">@T["details.addToCart"]</button>
+                </form>
+            }
+            else
+            {
+                <a class="btn btn--wide" href="/Identity/Account/Login?returnUrl=@Uri.EscapeDataString("/Customer/Home/Details/" + p.Id)">@T["details.loginToBuy"]</a>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.Related.Count > 0)
+{
+    <section class="section">
+        <header class="section__head"><h2>@T["details.related"]</h2></header>
+        <div class="book-grid book-grid--4">
+            @foreach (var r in Model.Related)
+            {
+                <partial name="_BookCard" model="r" />
+            }
+        </div>
+    </section>
+}

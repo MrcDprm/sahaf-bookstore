@@ -1,0 +1,90 @@
+@model CatalogVM
+@{
+    var english = Culture.IsEnglish;
+    var active = Model.Categories.FirstOrDefault(c => c.Category.Id == Model.CategoryId)?.Category;
+    ViewData["Title"] = active?.LocalName(english) ?? T["catalog.title"];
+
+    string Link(int? categoryId, string sort, int page, string? q)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrEmpty(q)) parts.Add("q=" + Uri.EscapeDataString(q));
+        if (categoryId.HasValue) parts.Add("categoryId=" + categoryId);
+        if (sort != "new") parts.Add("sort=" + sort);
+        if (page > 1) parts.Add("page=" + page);
+        return "/Customer/Home/Catalog" + (parts.Count > 0 ? "?" + string.Join("&", parts) : "");
+    }
+
+    var sorts = new[] { ("new", "catalog.sortNew"), ("price-asc", "catalog.sortPriceAsc"), ("price-desc", "catalog.sortPriceDesc"), ("title", "catalog.sortTitle"), ("discount", "catalog.sortDiscount") };
+}
+
+<div class="catalog">
+    <aside class="catalog__side">
+        <h2 class="side-title">@T["catalog.categories"]</h2>
+        <ul class="side-list">
+            <li><a href="@Link(null, Model.Sort, 1, Model.Query)" aria-current="@(Model.CategoryId == null ? "page" : null)">@T["catalog.all"]</a></li>
+            @foreach (var c in Model.Categories)
+            {
+                <li>
+                    <a href="@Link(c.Category.Id, Model.Sort, 1, Model.Query)" aria-current="@(c.Category.Id == Model.CategoryId ? "page" : null)">
+                        @c.Category.LocalName(english) <span>@c.Count</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </aside>
+
+    <section class="catalog__main">
+        <header class="catalog__head">
+            <div>
+                <h1>@(active?.LocalName(english) ?? T["catalog.title"])</h1>
+                <p class="muted">
+                    @if (!string.IsNullOrEmpty(Model.Query))
+                    {
+                        @T["catalog.resultsFor", Model.TotalCount, Model.Query]
+                    }
+                    else
+                    {
+                        @T["catalog.results", Model.TotalCount]
+                    }
+                </p>
+            </div>
+            <form method="get" class="sort-form" data-autosubmit>
+                @if (!string.IsNullOrEmpty(Model.Query))
+                {
+                    <input type="hidden" name="q" value="@Model.Query" />
+                }
+                @if (Model.CategoryId.HasValue)
+                {
+                    <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                }
+                <label for="sort">@T["catalog.sort"]</label>
+                <select id="sort" name="sort">
+                    @foreach (var (value, key) in sorts)
+                    {
+                        <option value="@value" selected="@(value == Model.Sort)">@T[key]</option>
+                    }
+                </select>
+                <noscript><button class="btn btn--small" type="submit">@T["catalog.apply"]</button></noscript>
+            </form>
+        </header>
+
+        @if (Model.Products.Count == 0)
+        {
+            <div class="empty-state">
+                <h2>@T["catalog.emptyTitle"]</h2>
+                <p>@T["catalog.emptyText"]</p>
+                <a class="btn" href="/Customer/Home/Catalog">@T["catalog.all"]</a>
+            </div>
+        }
+        else
+        {
+            <div class="book-grid">
+                @foreach (var p in Model.Products)
+                {
+                    <partial name="_BookCard" model="p" />
+                }
+            </div>
+            <partial name="_Pagination" model="(Model.Page, Model.TotalPages, (Func<int, string>)(i => Link(Model.CategoryId, Model.Sort, i, Model.Query)))" />
+        }
+    </section>
+</div>
