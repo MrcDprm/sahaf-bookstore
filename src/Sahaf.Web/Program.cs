@@ -54,6 +54,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
+// Antiforgery and TempData cookies get the Secure flag on HTTPS, like the
+// sign-in cookie (their default is to never set it).
+builder.Services.AddAntiforgery(options => options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest);
+builder.Services.Configure<CookieTempDataProviderOptions>(options =>
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest);
+
 // The cookie's security stamp is checked on every request (default: every
 // 30 minutes), so locking a user or changing a role takes effect at once.
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>

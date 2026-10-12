@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,18 +16,24 @@ public class EmailSettings
     public string From { get; set; } = "Sahaf <no-reply@miracdeprem.com>";
 }
 
-// Sends mail through the Resend HTTP API. Without an API key (local
-// development) the message is written to the log instead, so the
-// confirmation link can still be opened.
-public class ResendEmailSender(HttpClient http, IOptions<EmailSettings> options, ILogger<ResendEmailSender> logger)
-    : IEmailSender
+// Sends mail through the Resend HTTP API. Without an API key the message is
+// not sent; in development it is written to the log so the confirmation link
+// can still be opened. Production logs never contain the links.
+public class ResendEmailSender(
+    HttpClient http,
+    IOptions<EmailSettings> options,
+    IHostEnvironment environment,
+    ILogger<ResendEmailSender> logger) : IEmailSender
 {
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         var settings = options.Value;
         if (string.IsNullOrWhiteSpace(settings.ResendApiKey))
         {
-            logger.LogWarning("Resend API key is not set. E-mail to {Email}: {Subject}\n{Body}", email, subject, htmlMessage);
+            if (environment.IsDevelopment())
+                logger.LogWarning("Resend API key is not set. E-mail to {Email}: {Subject}\n{Body}", email, subject, htmlMessage);
+            else
+                logger.LogError("Resend API key is not set; an e-mail was not sent ({Subject}).", subject);
             return;
         }
 
