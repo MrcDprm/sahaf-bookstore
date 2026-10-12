@@ -64,7 +64,17 @@ public class FieldTagHelper(IHtmlGenerator generator) : TagHelper
 
     private static Dictionary<string, object> WithType(Dictionary<string, object> attrs, string type)
     {
-        attrs["type"] = type;
+        // type="number" rejects "215,00", the Turkish way of writing decimals,
+        // so money fields are text inputs that open the numeric keyboard.
+        if (type == "decimal")
+        {
+            attrs["type"] = "text";
+            attrs["inputmode"] = "decimal";
+        }
+        else
+        {
+            attrs["type"] = type;
+        }
         return attrs;
     }
 }
