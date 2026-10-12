@@ -33,7 +33,7 @@ public class MediaController(IUnitOfWork unitOfWork) : Controller
     [HttpGet("lang/{code}")]
     public IActionResult Language(string code, string? returnUrl)
     {
-        var culture = code == "en" ? "en-GB" : "tr-TR";
+        var culture = code == "en" ? "en" : "tr";
         Response.Cookies.Append(
             Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
             Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.MakeCookieValue(new(culture)),
