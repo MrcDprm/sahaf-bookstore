@@ -74,8 +74,9 @@ builder.Services.AddLocalization();
 builder.Services.AddSingleton<IConfigureOptions<MvcOptions>, LocalizedModelBindingMessages>();
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    var cultures = new[] { new CultureInfo("tr-TR"), new CultureInfo("en-GB") };
-    options.DefaultRequestCulture = new RequestCulture("tr-TR");
+    // Neutral cultures, so "en", "en-US" and old "en-GB" cookies all match.
+    var cultures = new[] { new CultureInfo("tr"), new CultureInfo("en") };
+    options.DefaultRequestCulture = new RequestCulture("tr");
     options.SupportedCultures = cultures;
     options.SupportedUICultures = cultures;
     options.RequestCultureProviders = [new CookieRequestCultureProvider(), new AcceptLanguageHeaderRequestCultureProvider()];
@@ -95,7 +96,7 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
-        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        ClientIp.Of(context),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
     options.AddPolicy("webhook", context => RateLimitPartition.GetFixedWindowLimiter(
         "stripe", _ => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromMinutes(1) }));

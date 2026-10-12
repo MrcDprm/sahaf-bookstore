@@ -153,3 +153,27 @@ public class CartOwnershipTests
         Assert.Empty(db.ShoppingCarts);
     }
 }
+
+// Render sits behind Cloudflare: rate limits must count per visitor
+// (CF-Connecting-IP), not per Cloudflare server.
+public class ClientIpTests
+{
+    private static HttpContext Context(string? header)
+    {
+        var context = new DefaultHttpContext();
+        context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.1");
+        if (header != null) context.Request.Headers[ClientIp.CloudflareHeader] = header;
+        return context;
+    }
+
+    [Fact]
+    public void Cloudflare_header_wins_over_the_proxy_address() =>
+        Assert.Equal("203.0.113.9", ClientIp.Of(Context("203.0.113.9")));
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("not-an-ip")]
+    [InlineData("1.2.3.4, 5.6.7.8")]
+    public void Without_a_valid_header_the_connection_address_is_used(string? header) =>
+        Assert.Equal("10.0.0.1", ClientIp.Of(Context(header)));
+}
