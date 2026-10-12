@@ -1,0 +1,59 @@
+@model AdminListVM<UserRow>
+@{
+    ViewData["Title"] = T["nav.users"];
+    var me = User.UserId();
+    string Link(int page) => "/Admin/User?" + (string.IsNullOrEmpty(Model.Query) ? "" : "q=" + Uri.EscapeDataString(Model.Query) + "&") + "page=" + page;
+}
+<partial name="_AdminNav" />
+<header class="admin-head">
+    <h1>@T["nav.users"] <span class="muted small">(@Model.TotalCount)</span></h1>
+    <a class="btn btn--small" href="/Identity/Account/Register">+ @T["account.createUser"]</a>
+</header>
+
+<form method="get" class="filter-bar">
+    <label class="sr-only" for="uq">@T["nav.search"]</label>
+    <input id="uq" name="q" type="search" maxlength="80" value="@Model.Query" placeholder="@T["user.search"]" />
+    <button class="btn btn--small" type="submit">@T["nav.search"]</button>
+</form>
+
+<div class="table-wrap">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">@T["field.fullName"]</th>
+                <th scope="col">@T["field.email"]</th>
+                <th scope="col">@T["field.role"]</th>
+                <th scope="col">@T["field.company"]</th>
+                <th scope="col">@T["user.state"]</th>
+                <th scope="col"><span class="sr-only">@T["admin.actions"]</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model.Items)
+            {
+                <tr>
+                    <td><strong>@u.Name</strong></td>
+                    <td class="small">@u.Email @if (!u.EmailConfirmed) { <span class="tag tag--warn">@T["user.unconfirmed"]</span> }</td>
+                    <td>@(string.IsNullOrEmpty(u.Role) ? "—" : T["role." + u.Role])</td>
+                    <td>@(u.CompanyName ?? "—")</td>
+                    <td>@if (u.IsLocked) { <span class="badge badge--cancelled">@T["user.lockedBadge"]</span> } else { <span class="badge badge--approved">@T["user.active"]</span> }</td>
+                    <td class="actions">
+                        @if (u.Id != me)
+                        {
+                            <a href="/Admin/User/RoleManagement/@u.Id">@T["user.changeRole"]</a>
+                            <form method="post" action="/Admin/User/LockUnlock/@u.Id" data-confirm="@T[u.IsLocked ? "user.confirmUnlock" : "user.confirmLock", u.Name]">
+                                @Html.AntiForgeryToken()
+                                <button class="link-btn" type="submit">@T[u.IsLocked ? "user.unlock" : "user.lock"]</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="muted small">@T["user.you"]</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<partial name="_Pagination" model="(Model.Page, Model.TotalPages, (Func<int, string>)Link)" />

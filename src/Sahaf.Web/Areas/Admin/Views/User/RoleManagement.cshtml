@@ -1,0 +1,21 @@
+@model RoleManagementVM
+@{
+    ViewData["Title"] = T["user.changeRole"];
+}
+<partial name="_AdminNav" />
+<div class="page-narrow">
+    <h1>@T["user.changeRole"]</h1>
+    <form method="post" class="form panel" novalidate>
+        <p><strong>@Model.Name</strong><br /><span class="muted">@Model.Email</span></p>
+        <input type="hidden" asp-for="UserId" />
+        <div class="form__grid">
+            <field asp-for="Role" type="select" items="Model.RoleList" />
+            <field asp-for="CompanyId" type="select" items="Model.CompanyList" option-label="—" hint="@T["user.companyHint"]" />
+        </div>
+        <p class="muted small">@T["user.reloginNote"]</p>
+        <div class="form__actions">
+            <button class="btn" type="submit">@T["common.save"]</button>
+            <a class="btn btn--ghost" href="/Admin/User">@T["admin.back"]</a>
+        </div>
+    </form>
+</div>

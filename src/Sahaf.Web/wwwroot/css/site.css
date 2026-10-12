@@ -556,6 +556,30 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 .image-list img { width: 48px; height: 72px; object-fit: cover; border-radius: 3px; border: 1px solid var(--line); }
 .image-list form { margin: 0; }
 
+/* ---------- Orders and users ---------- */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.chips a { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: .88rem; color: var(--ink-2); }
+.chips a:hover { border-color: var(--accent); color: var(--ink); }
+.chips a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; white-space: nowrap; background: var(--paper-2); color: var(--ink-2); }
+.badge--lg { font-size: .9rem; padding: 6px 14px; }
+.badge--pending { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
+.badge--approved, .badge--processing { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.badge--shipped { background: var(--ink); color: var(--paper); }
+.badge--cancelled { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+.tag--warn { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
+.timeline { list-style: none; margin: 0 0 24px; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; counter-reset: step; }
+.timeline li { position: relative; padding-top: 14px; font-size: .85rem; color: var(--ink-3); border-top: 3px solid var(--line); }
+.timeline li.is-done { border-top-color: var(--ok); color: var(--ink-2); }
+.timeline li.is-current { border-top-color: var(--accent); color: var(--ink); font-weight: 600; }
+.stack { display: grid; gap: 20px; min-width: 0; }
+.actions-panel { display: grid; gap: 14px; }
+.actions-panel form { margin: 0; }
+.ship-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.ship-form input { flex: 1 1 160px; width: auto; min-height: 36px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.facts--plain { display: grid; gap: 10px; margin: 12px 0 0; padding: 0; border: 0; }
+.receipt__items a { color: inherit; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }

@@ -1,0 +1,72 @@
+@model AdminListVM<OrderHeader>
+@{
+    var staff = User.IsStaff();
+    ViewData["Title"] = staff ? T["nav.orders"] : T["nav.myOrders"];
+    string status = ViewBag.Status;
+    var filters = new[] { ("all", "order.filterAll"), ("pending", "order.filterPending"), ("approved", "order.filterApproved"), ("processing", "order.filterProcessing"), ("shipped", "order.filterShipped"), ("cancelled", "order.filterCancelled") };
+    string Link(int page) => $"/Admin/Order?status={status}" + (page > 1 ? $"&page={page}" : "");
+}
+@if (staff)
+{
+    <partial name="_AdminNav" />
+}
+<header class="admin-head">
+    <h1>@ViewData["Title"] <span class="muted small">(@Model.TotalCount)</span></h1>
+</header>
+
+<nav class="chips" aria-label="@T["order.filter"]">
+    @foreach (var (value, key) in filters)
+    {
+        <a href="/Admin/Order?status=@value" aria-current="@(value == status ? "page" : null)">@T[key]</a>
+    }
+</nav>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <h2>@T["order.emptyTitle"]</h2>
+        @if (!staff)
+        {
+            <a class="btn" href="/Customer/Home/Catalog">@T["home.ctaCatalog"]</a>
+        }
+    </div>
+}
+else
+{
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">@T["order.number"]</th>
+                    <th scope="col">@T["order.date"]</th>
+                    @if (staff)
+                    {
+                        <th scope="col">@T["order.customer"]</th>
+                    }
+                    <th scope="col">@T["order.status"]</th>
+                    <th scope="col">@T["order.payment"]</th>
+                    <th scope="col" class="num">@T["cart.total"]</th>
+                    <th scope="col"><span class="sr-only">@T["admin.actions"]</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Items)
+                {
+                    <tr>
+                        <td class="mono">#@o.Number</td>
+                        <td>@Culture.Date(o.OrderDate)</td>
+                        @if (staff)
+                        {
+                            <td>@o.Name<div class="muted small">@o.ApplicationUser.Email</div></td>
+                        }
+                        <td><span class="badge badge--@o.OrderStatus.ToLowerInvariant()">@T["status." + o.OrderStatus]</span></td>
+                        <td class="small">@T["payment." + o.PaymentStatus]</td>
+                        <td class="num mono">@Culture.Money(o.OrderTotal)</td>
+                        <td class="actions"><a href="/Admin/Order/Details/@o.Id">@T["order.open"]</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <partial name="_Pagination" model="(Model.Page, Model.TotalPages, (Func<int, string>)Link)" />
+}

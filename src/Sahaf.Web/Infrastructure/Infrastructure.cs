@@ -87,26 +87,34 @@ public class LocalizedIdentityErrorDescriber(IStringLocalizer<SharedResource> t)
     public override IdentityError UserLockoutNotEnabled() => E(nameof(DefaultError));
 }
 
-// Sends the order confirmation e-mail. All values are HTML-encoded because
-// the name and address were typed by the customer.
+// Order e-mails. All values are HTML-encoded because the name and address
+// were typed by the customer.
 public class OrderEmails(IEmailSender sender, IStringLocalizer<SharedResource> t, ILogger<OrderEmails> logger)
 {
-    public async Task SendConfirmationAsync(OrderHeader order, string email, string orderUrl)
+    public Task SendConfirmationAsync(OrderHeader order, string email, string orderUrl) =>
+        SendAsync(email, t["mail.order.subject", order.Number], order.Name,
+            t["mail.order.body", order.Number, Culture.Money(order.OrderTotal)], orderUrl, order.Id);
+
+    public Task SendShippedAsync(OrderHeader order, string email, string orderUrl) =>
+        SendAsync(email, t["mail.shipped.subject", order.Number], order.Name,
+            t["mail.shipped.body", order.Number, order.Carrier ?? "", order.TrackingNumber ?? ""], orderUrl, order.Id);
+
+    private async Task SendAsync(string email, string subject, string name, string text, string orderUrl, Guid orderId)
     {
         var html = HtmlEncoder.Default;
         var body =
-            $"<p>{html.Encode(t["mail.order.hello", order.Name])}</p>" +
-            $"<p>{html.Encode(t["mail.order.body", order.Number, Culture.Money(order.OrderTotal)])}</p>" +
+            $"<p>{html.Encode(t["mail.order.hello", name])}</p>" +
+            $"<p>{html.Encode(text)}</p>" +
             $"<p><a href=\"{html.Encode(orderUrl)}\">{html.Encode(t["mail.order.link"])}</a></p>" +
-            $"<p>Sahaf</p>";
+            "<p>Sahaf</p>";
         try
         {
-            await sender.SendEmailAsync(email, t["mail.order.subject", order.Number], body);
+            await sender.SendEmailAsync(email, subject, body);
         }
         catch (Exception ex)
         {
-            // A failed e-mail must not undo a paid order.
-            logger.LogError(ex, "Order confirmation e-mail failed for order {Order}", order.Id);
+            // A failed e-mail must not undo a paid or shipped order.
+            logger.LogError(ex, "Order e-mail failed for order {Order}", orderId);
         }
     }
 }

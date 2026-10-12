@@ -1,0 +1,143 @@
+@model OrderVM
+@{
+    var o = Model.OrderHeader;
+    var staff = User.IsStaff();
+    var english = Culture.IsEnglish;
+    var step = OrderWorkflow.StepIndex(o.OrderStatus);
+    var cancelled = o.OrderStatus == SD.StatusCancelled;
+    var isOwner = User.UserId() == o.ApplicationUserId;
+    ViewData["Title"] = T["order.title", o.Number];
+}
+@if (staff)
+{
+    <partial name="_AdminNav" />
+}
+<nav class="breadcrumb" aria-label="@T["details.breadcrumb"]">
+    <a href="/Admin/Order">@(staff ? T["nav.orders"] : T["nav.myOrders"])</a>
+    <span aria-hidden="true">/</span>
+    <span>#@o.Number</span>
+</nav>
+
+<header class="admin-head">
+    <div>
+        <h1>@T["order.title", o.Number]</h1>
+        <p class="muted">@Culture.Date(o.OrderDate) · @T["payment." + o.PaymentStatus]</p>
+    </div>
+    <span class="badge badge--lg badge--@o.OrderStatus.ToLowerInvariant()">@T["status." + o.OrderStatus]</span>
+</header>
+
+@if (!cancelled)
+{
+    <ol class="timeline" aria-label="@T["order.status"]">
+        @for (var i = 0; i < OrderWorkflow.Steps.Length; i++)
+        {
+            <li class="@(i < step ? "is-done" : i == step ? "is-current" : "")" aria-current="@(i == step ? "step" : null)">
+                @T["status." + OrderWorkflow.Steps[i]]
+            </li>
+        }
+    </ol>
+}
+
+<div class="cart">
+    <div class="stack">
+        @if (staff)
+        {
+            <form method="post" action="/Admin/Order/UpdateDetails" class="panel form" novalidate>
+                <h2>@T["summary.shipping"]</h2>
+                <input type="hidden" asp-for="OrderHeader.Id" />
+                <div class="form__grid">
+                    <field asp-for="OrderHeader.Name" />
+                    <field asp-for="OrderHeader.PhoneNumber" type="tel" />
+                </div>
+                <field asp-for="OrderHeader.StreetAddress" />
+                <div class="form__grid form__grid--3">
+                    <field asp-for="OrderHeader.City" />
+                    <field asp-for="OrderHeader.State" />
+                    <field asp-for="OrderHeader.PostalCode" />
+                </div>
+                <div class="form__grid">
+                    <field asp-for="OrderHeader.Carrier" />
+                    <field asp-for="OrderHeader.TrackingNumber" />
+                </div>
+                <div class="form__actions"><button class="btn btn--ghost btn--small" type="submit">@T["common.save"]</button></div>
+            </form>
+        }
+        else
+        {
+            <section class="panel">
+                <h2>@T["summary.shipping"]</h2>
+                <dl class="facts facts--plain">
+                    <div><dt>@T["field.fullName"]</dt><dd>@o.Name</dd></div>
+                    <div><dt>@T["field.phone"]</dt><dd>@o.PhoneNumber</dd></div>
+                    <div><dt>@T["field.street"]</dt><dd>@o.StreetAddress, @o.State / @o.City @o.PostalCode</dd></div>
+                    @if (!string.IsNullOrEmpty(o.TrackingNumber))
+                    {
+                        <div><dt>@T["field.carrier"]</dt><dd>@o.Carrier</dd></div>
+                        <div><dt>@T["field.tracking"]</dt><dd>@o.TrackingNumber</dd></div>
+                    }
+                </dl>
+            </section>
+        }
+
+        @if (staff && (OrderWorkflow.CanStartProcessing(o.OrderStatus) || OrderWorkflow.CanShip(o.OrderStatus) || OrderWorkflow.CanCancel(o.OrderStatus)))
+        {
+            <section class="panel actions-panel">
+                <h2>@T["order.actions"]</h2>
+                @if (OrderWorkflow.CanStartProcessing(o.OrderStatus))
+                {
+                    <form method="post" action="/Admin/Order/StartProcessing/@o.Id">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn--small" type="submit">@T["order.startProcessing"]</button>
+                    </form>
+                }
+                @if (OrderWorkflow.CanShip(o.OrderStatus))
+                {
+                    <form method="post" action="/Admin/Order/Ship/@o.Id" class="ship-form">
+                        @Html.AntiForgeryToken()
+                        <label class="sr-only" for="carrier">@T["field.carrier"]</label>
+                        <input id="carrier" name="carrier" maxlength="40" placeholder="@T["field.carrier"]" value="@o.Carrier" required />
+                        <label class="sr-only" for="trackingNumber">@T["field.tracking"]</label>
+                        <input id="trackingNumber" name="trackingNumber" maxlength="40" placeholder="@T["field.tracking"]" value="@o.TrackingNumber" required />
+                        <button class="btn btn--small" type="submit">@T["order.ship"]</button>
+                    </form>
+                }
+                @if (OrderWorkflow.CanCancel(o.OrderStatus))
+                {
+                    <form method="post" action="/Admin/Order/Cancel/@o.Id" data-confirm="@T[OrderWorkflow.NeedsRefund(o.PaymentStatus) ? "order.confirmRefund" : "order.confirmCancel"]">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn--small btn--danger" type="submit">@T[OrderWorkflow.NeedsRefund(o.PaymentStatus) ? "order.cancelRefund" : "order.cancel"]</button>
+                    </form>
+                }
+            </section>
+        }
+    </div>
+
+    <aside class="receipt">
+        <h2 class="receipt__title">#@o.Number</h2>
+        <ul class="receipt__items">
+            @foreach (var d in Model.OrderDetails)
+            {
+                <li>
+                    <span><a href="/Customer/Home/Details/@d.ProductId">@d.Product.LocalTitle(english)</a><br /><small class="muted">@d.Count × @Culture.Money(d.Price)</small></span>
+                    <span>@Culture.Money(d.Price * d.Count)</span>
+                </li>
+            }
+        </ul>
+        <p class="receipt__total"><span>@T["cart.total"]</span><strong>@Culture.Money(o.OrderTotal)</strong></p>
+        @if (o.PaymentStatus == SD.PaymentStatusDelayedPayment && o.PaymentDueDate.HasValue)
+        {
+            <p class="receipt__note">@T["order.dueDate", Culture.Date(o.PaymentDueDate.Value)]</p>
+        }
+        @if (o.PaymentDate.HasValue)
+        {
+            <p class="receipt__note">@T["order.paidOn", Culture.Date(o.PaymentDate.Value)]</p>
+        }
+        @if (isOwner && OrderWorkflow.CanPayLater(o.OrderStatus, o.PaymentStatus))
+        {
+            <form method="post" action="/Admin/Order/PayNow/@o.Id">
+                @Html.AntiForgeryToken()
+                <button class="btn btn--wide" type="submit">@T["order.payNow"]</button>
+            </form>
+        }
+    </aside>
+</div>
