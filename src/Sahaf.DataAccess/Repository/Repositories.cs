@@ -6,13 +6,21 @@ namespace Sahaf.DataAccess.Repository;
 
 public class CategoryRepository(ApplicationDbContext db) : Repository<Category>(db), ICategoryRepository
 {
-    public void Update(Category category) => Db.Categories.Update(category);
+    // Like every Update here, copies only the editable fields onto the stored
+    // row instead of attaching the posted object.
+    public void Update(Category category)
+    {
+        var fromDb = Db.Categories.FirstOrDefault(c => c.Id == category.Id);
+        if (fromDb == null) return;
+        fromDb.Name = category.Name;
+        fromDb.NameEn = category.NameEn;
+        fromDb.DisplayOrder = category.DisplayOrder;
+    }
 }
 
 public class ProductRepository(ApplicationDbContext db) : Repository<Product>(db), IProductRepository
 {
-    // Copies only the editable fields onto the stored row: CreatedAt and the
-    // images can never be overwritten from a posted form.
+    // CreatedAt, CoverImageId and the images can never come from a posted form.
     public void Update(Product product)
     {
         var fromDb = Db.Products.FirstOrDefault(p => p.Id == product.Id);
@@ -38,22 +46,27 @@ public class ProductImageRepository(ApplicationDbContext db) : Repository<Produc
 
 public class CompanyRepository(ApplicationDbContext db) : Repository<Company>(db), ICompanyRepository
 {
-    public void Update(Company company) => Db.Companies.Update(company);
+    public void Update(Company company)
+    {
+        var fromDb = Db.Companies.FirstOrDefault(c => c.Id == company.Id);
+        if (fromDb == null) return;
+        fromDb.Name = company.Name;
+        fromDb.StreetAddress = company.StreetAddress;
+        fromDb.City = company.City;
+        fromDb.State = company.State;
+        fromDb.PostalCode = company.PostalCode;
+        fromDb.PhoneNumber = company.PhoneNumber;
+    }
 }
 
-public class ShoppingCartRepository(ApplicationDbContext db) : Repository<ShoppingCart>(db), IShoppingCartRepository
-{
-    public void Update(ShoppingCart cart) => Db.ShoppingCarts.Update(cart);
-}
+public class ShoppingCartRepository(ApplicationDbContext db) : Repository<ShoppingCart>(db), IShoppingCartRepository;
 
-public class ApplicationUserRepository(ApplicationDbContext db) : Repository<ApplicationUser>(db), IApplicationUserRepository
-{
-    public void Update(ApplicationUser user) => Db.Users.Update(user);
-}
+// Read-only: users are changed only through UserManager, which keeps the
+// security stamp and concurrency stamp correct.
+public class ApplicationUserRepository(ApplicationDbContext db) : Repository<ApplicationUser>(db), IApplicationUserRepository;
 
 public class OrderHeaderRepository(ApplicationDbContext db) : Repository<OrderHeader>(db), IOrderHeaderRepository
 {
-    public void Update(OrderHeader order) => Db.OrderHeaders.Update(order);
 
     public void UpdateStatus(Guid id, string orderStatus, string? paymentStatus = null)
     {

@@ -31,19 +31,12 @@ public interface ICompanyRepository : IRepository<Company>
     void Update(Company company);
 }
 
-public interface IShoppingCartRepository : IRepository<ShoppingCart>
-{
-    void Update(ShoppingCart cart);
-}
+public interface IShoppingCartRepository : IRepository<ShoppingCart>;
 
-public interface IApplicationUserRepository : IRepository<ApplicationUser>
-{
-    void Update(ApplicationUser user);
-}
+public interface IApplicationUserRepository : IRepository<ApplicationUser>;
 
 public interface IOrderHeaderRepository : IRepository<OrderHeader>
 {
-    void Update(OrderHeader order);
     void UpdateStatus(Guid id, string orderStatus, string? paymentStatus = null);
     void UpdateStripePaymentId(Guid id, string sessionId, string? paymentIntentId);
 }
