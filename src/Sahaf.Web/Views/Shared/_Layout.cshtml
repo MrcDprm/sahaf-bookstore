@@ -45,7 +45,8 @@
     <meta name="twitter:card" content="summary_large_image" />
     @if (ViewData["JsonLd"] is string jsonLd)
     {
-        <script type="application/ld+json">@Html.Raw(jsonLd)</script>
+        @* "!" keeps the script tag helper from encoding the + in the type *@
+        <!script type="application/ld+json">@Html.Raw(jsonLd)</!script>
     }
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
