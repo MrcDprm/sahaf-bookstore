@@ -3,6 +3,9 @@
     var english = Culture.IsEnglish;
     var active = Model.Categories.FirstOrDefault(c => c.Category.Id == Model.CategoryId)?.Category;
     ViewData["Title"] = active?.LocalName(english) ?? T["catalog.title"];
+    ViewData["Description"] = active != null
+        ? T["seo.category.description", active.LocalName(english)].Value
+        : T["seo.catalog.description"].Value;
 
     string Link(int? categoryId, string sort, int page, string? q)
     {
