@@ -6,7 +6,8 @@ namespace Sahaf.Web.Controllers;
 
 public class SeoController(IUnitOfWork unitOfWork) : Controller
 {
-    [HttpGet("sitemap.xml")]
+    // HEAD too: some crawlers and checkers ask for the headers first
+    [HttpGet("sitemap.xml"), HttpHead("sitemap.xml")]
     [ResponseCache(Duration = 3600)]
     public IActionResult Sitemap()
     {
@@ -16,7 +17,7 @@ public class SeoController(IUnitOfWork unitOfWork) : Controller
         return Content(Seo.Sitemap(paths), "application/xml; charset=utf-8");
     }
 
-    [HttpGet("robots.txt")]
+    [HttpGet("robots.txt"), HttpHead("robots.txt")]
     [ResponseCache(Duration = 86400)]
     public IActionResult Robots() => Content(Seo.Robots, "text/plain; charset=utf-8");
 }
