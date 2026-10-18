@@ -3,7 +3,25 @@
     var english = Culture.IsEnglish;
     var p = Model.Product;
     var title = p.LocalTitle(english);
-    ViewData["Title"] = title;
+    ViewData["Title"] = $"{title} – {p.Author}";
+    ViewData["Description"] = Seo.Summary(p.LocalDescription(english));
+    ViewData["OgType"] = "book";
+    // Generated covers are SVG, which link previews do not show; uploaded covers are images.
+    if (p.CoverImageId != null) ViewData["OgImage"] = Covers.Url(p);
+    var book = new Dictionary<string, object>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Book",
+        ["name"] = title,
+        ["author"] = new Dictionary<string, object> { ["@type"] = "Person", ["name"] = p.Author },
+        ["description"] = p.LocalDescription(english),
+        ["genre"] = p.Category.LocalName(english),
+        ["image"] = Seo.Absolute(Covers.Url(p)),
+        ["url"] = Seo.SiteUrl + $"/Customer/Home/Details/{p.Id}" + (english ? "?lang=en" : ""),
+    };
+    if (!string.IsNullOrEmpty(p.ISBN)) book["isbn"] = p.ISBN;
+    if (p.PageCount is { } pages) book["numberOfPages"] = pages;
+    ViewData["JsonLd"] = Seo.JsonLd(book);
 }
 
 <nav class="breadcrumb" aria-label="@T["details.breadcrumb"]">

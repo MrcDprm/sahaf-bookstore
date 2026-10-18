@@ -1,16 +1,52 @@
 @using Sahaf.Web.Infrastructure
 @{
     var english = Culture.IsEnglish;
-    var path = Context.Request.Path + Context.Request.QueryString;
     var title = ViewData["Title"] as string ?? ViewData["Title"]?.ToString();
+    var fullTitle = ViewData["FullTitle"] as string ?? (string.IsNullOrEmpty(title) ? "Sahaf" : title + " · Sahaf");
+    var description = ViewData["Description"] as string ?? T["meta.description"].Value;
+    // The language link returns to the same page without ?lang, so the cookie decides.
+    var path = Seo.WithoutLang(Context.Request.Path, Context.Request.Query);
+
+    // Private, empty or duplicate pages stay out of search results.
+    var area = ViewContext.RouteData.Values["area"] as string;
+    var controller = ViewContext.RouteData.Values["controller"] as string;
+    var noIndex = ViewData["NoIndex"] is true || area is "Admin" or "Identity" || controller is "Cart"
+                  || Context.Request.Query.ContainsKey("q");
+    var urlTr = Seo.PageUrl(Context.Request.Path, Context.Request.Query, english: false);
+    var urlEn = Seo.PageUrl(Context.Request.Path, Context.Request.Query, english: true);
+    var image = Seo.Absolute(ViewData["OgImage"] as string ?? Seo.DefaultImage);
 }
 <!DOCTYPE html>
 <html lang="@(english ? "en" : "tr")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@(string.IsNullOrEmpty(title) ? "Sahaf" : title + " · Sahaf")</title>
-    <meta name="description" content="@T["meta.description"]" />
+    <title>@fullTitle</title>
+    <meta name="description" content="@description" />
+    @if (noIndex)
+    {
+        <meta name="robots" content="noindex" />
+    }
+    else
+    {
+        <link rel="canonical" href="@(english ? urlEn : urlTr)" />
+        <link rel="alternate" hreflang="tr" href="@urlTr" />
+        <link rel="alternate" hreflang="en" href="@urlEn" />
+        <link rel="alternate" hreflang="x-default" href="@urlTr" />
+    }
+    <meta property="og:type" content="@(ViewData["OgType"] as string ?? "website")" />
+    <meta property="og:site_name" content="Sahaf" />
+    <meta property="og:title" content="@fullTitle" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:url" content="@(english ? urlEn : urlTr)" />
+    <meta property="og:image" content="@image" />
+    <meta property="og:locale" content="@(english ? "en_US" : "tr_TR")" />
+    <meta property="og:locale:alternate" content="@(english ? "tr_TR" : "en_US")" />
+    <meta name="twitter:card" content="summary_large_image" />
+    @if (ViewData["JsonLd"] is string jsonLd)
+    {
+        <script type="application/ld+json">@Html.Raw(jsonLd)</script>
+    }
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="~/apple-touch-icon.png" />

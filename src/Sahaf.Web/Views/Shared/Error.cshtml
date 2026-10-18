@@ -2,6 +2,7 @@
     int code = ViewBag.Code;
     var key = code is 404 or 403 or 429 ? $"error.{code}" : "error";
     ViewData["Title"] = T[key + ".title"];
+    ViewData["NoIndex"] = true;
 }
 <section class="empty-state">
     <p class="empty-state__code">@code</p>

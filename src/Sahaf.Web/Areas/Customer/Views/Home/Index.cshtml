@@ -1,7 +1,23 @@
 @model HomeVM
 @{
     ViewData["Title"] = T["home.title"];
+    ViewData["FullTitle"] = T["seo.home.title"].Value;
     var english = Culture.IsEnglish;
+    ViewData["JsonLd"] = Seo.JsonLd(new Dictionary<string, object>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "WebSite",
+        ["name"] = "Sahaf",
+        ["url"] = Seo.SiteUrl + "/",
+        ["inLanguage"] = english ? "en" : "tr",
+        ["description"] = T["meta.description"].Value,
+        ["potentialAction"] = new Dictionary<string, object>
+        {
+            ["@type"] = "SearchAction",
+            ["target"] = Seo.SiteUrl + "/Customer/Home/Catalog?q={search_term_string}",
+            ["query-input"] = "required name=search_term_string",
+        },
+    });
 }
 
 <section class="hero">
