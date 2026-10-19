@@ -27,8 +27,9 @@ public static class SecurityHeaders
         "img-src 'self' data:; " +
         "style-src 'self' https://fonts.googleapis.com; " +
         "font-src https://fonts.gstatic.com; " +
-        "script-src 'self'; " +
-        "connect-src 'self'; " +
+        // Nabız: cookie-free visitor analytics (script + event requests).
+        "script-src 'self' https://nabiz.miracdeprem.com; " +
+        "connect-src 'self' https://nabiz.miracdeprem.com; " +
         // After the checkout form posts, the browser is redirected to Stripe.
         "form-action 'self' https://checkout.stripe.com; " +
         "frame-ancestors 'none'; base-uri 'self'; object-src 'none'";
