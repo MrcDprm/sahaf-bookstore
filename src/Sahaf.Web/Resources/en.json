@@ -357,6 +357,7 @@
   "user.companyHint": "Only for the organisation role.",
   "user.reloginNote": "Changing the role signs the user out; the new permissions apply at their next sign-in.",
   "footer.projects": "My projects",
+  "footer.otherProjects": "My other projects",
   "footer.portfolio": "Portfolio",
   "footer.source": "Source code"
 }
