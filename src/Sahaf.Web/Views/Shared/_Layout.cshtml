@@ -57,6 +57,11 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @* The admin area is not counted: staff browsing stays out of the stats. *@
+    @if (ViewContext.RouteData.Values["area"] as string != "Admin")
+    {
+        <script defer src="https://nabiz.miracdeprem.com/js/nabiz.js" data-site="sahaf.miracdeprem.com" data-mask="/Cart/OrderConfirmation/:id /Customer/Cart/OrderConfirmation/:id"></script>
+    }
 </head>
 <body>
     <a class="skip-link" href="#main">@T["nav.skip"]</a>
