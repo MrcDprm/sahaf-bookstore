@@ -116,15 +116,6 @@ render.yaml           Render servis tanımı
 - **Kaynak dosyası olmadan yerelleştirme.** İki JSON dosyasını okuyan küçük bir `IStringLocalizer` yazdım. Doğrulama mesajlarını ve alan adlarını da çeviriyor; bir test iki dilde anahtarların ve yer tutucuların aynı olduğunu kontrol ediyor.
 - **.NET'i ücretsiz barındırmak.** Vercel .NET çalıştırmadığı için uygulamayı Render için Docker'la paketledim, PostgreSQL için Neon kullandım. Uygulamanın önündeki proxy'yi yönetmeyi (forwarded header'lar, 443 portunda HTTPS), yayınlar arasında oturumlar düşmesin diye cookie anahtarlarını veritabanında tutmayı ve sunucunun diski silindiği için görselleri veritabanında saklamayı öğrendim.
 
-## Gelecek Planları
-
-- Stok takibi ve tükenen kitaplar
-- Kitabı satın alan müşterilerden yorum ve puan
-- İstek listesi ve indirim bildirimi
-- Hesap e-postasını değiştirme ve iki adımlı giriş
-- Veritabanındaki cookie anahtarlarını şifreleme
-- Yönetim panelinde satış raporları
-
 ## Kaynaklar
 
 - Kitaplar telifi sona ermiş klasiklerdir; açıklamalar, kapaklar ve fiyatlar bu demo mağaza için hazırlandı.

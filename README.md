@@ -116,15 +116,6 @@ render.yaml           Render service definition
 - **Localization without resource files.** I wrote a small `IStringLocalizer` that reads two JSON files. It also translates validation messages and field names, and a test makes sure both languages have the same keys and placeholders.
 - **Hosting .NET for free.** Vercel cannot run .NET, so I packaged the app in Docker for Render and used Neon for PostgreSQL. I learned to handle a proxy in front of the app (forwarded headers, HTTPS on port 443), keep cookie keys in the database so sign-ins survive deploys, and keep images in the database because the server's disk is wiped.
 
-## Future Plans
-
-- Stock tracking and out-of-stock books
-- Reviews and ratings from customers who bought the book
-- Wish list and "notify me" for discounts
-- Changing the account e-mail and two-factor sign-in
-- Encrypting the cookie keys stored in the database
-- Sales reports in the admin panel
-
 ## Credits
 
 - Book texts are public-domain classics; descriptions, covers and prices are made up for this demo shop.
