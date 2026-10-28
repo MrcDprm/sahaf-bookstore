@@ -78,15 +78,12 @@ public class AccountController(
         var byAdmin = User.IsInRole(SD.Role_Admin);
         if (User.Identity?.IsAuthenticated == true && !byAdmin) return LocalRedirect("/");
 
-        // Role and company are posted fields: only an admin may set them, and
-        // only to known values. Everyone else becomes a plain customer.
-        var role = SD.Role_Customer;
+        var role = RegistrationRole(byAdmin, model.Role);
         int? companyId = null;
-        if (byAdmin && !string.IsNullOrEmpty(model.Role))
+        if (role == null)
+            ModelState.AddModelError(nameof(model.Role), t["account.invalidRole"]);
+        else if (byAdmin)
         {
-            if (!SD.Roles.Contains(model.Role))
-                ModelState.AddModelError(nameof(model.Role), t["account.invalidRole"]);
-            role = model.Role;
             if (role == SD.Role_Company)
             {
                 if (model.CompanyId is not { } id || unitOfWork.Company.Get(c => c.Id == id) == null)
@@ -111,7 +108,7 @@ public class AccountController(
             return View(FillLists(model));
         }
 
-        await userManager.AddToRoleAsync(user, role);
+        await userManager.AddToRoleAsync(user, role!);
         logger.LogInformation("New account created with role {Role}", role);
         await SendConfirmationAsync(user);
 
@@ -121,6 +118,17 @@ public class AccountController(
             return RedirectToAction("Index", "User", new { area = "Admin" });
         }
         return Notice("account.checkMailTitle", "account.checkMailText");
+    }
+
+    /// <summary>
+    /// Role is a posted field: only an admin may set it, and only to a known value.
+    /// Everyone else becomes a plain customer, whatever they post. Null means an
+    /// admin asked for an unknown role.
+    /// </summary>
+    public static string? RegistrationRole(bool byAdmin, string? requested)
+    {
+        if (!byAdmin || string.IsNullOrEmpty(requested)) return SD.Role_Customer;
+        return SD.Roles.Contains(requested) ? requested : null;
     }
 
     // ---------- E-mail confirmation ----------

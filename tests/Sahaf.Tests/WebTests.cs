@@ -12,6 +12,7 @@ using Sahaf.DataAccess.Repository;
 using Sahaf.Models;
 using Sahaf.Utility;
 using Sahaf.Web.Areas.Customer.Controllers;
+using Sahaf.Web.Areas.Identity.Controllers;
 using Sahaf.Web.Infrastructure;
 using Sahaf.Web.Localization;
 
@@ -176,4 +177,36 @@ public class ClientIpTests
     [InlineData("1.2.3.4, 5.6.7.8")]
     public void Without_a_valid_header_the_connection_address_is_used(string? header) =>
         Assert.Equal("10.0.0.1", ClientIp.Of(Context(header)));
+}
+
+// Regression: the course version let anyone post Role=Admin on the sign-up form.
+public class RegistrationRoleTests
+{
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(SD.Role_Admin)]
+    [InlineData(SD.Role_Employee)]
+    [InlineData(SD.Role_Company)]
+    [InlineData("SuperUser")]
+    public void A_visitor_always_becomes_a_customer(string? posted) =>
+        Assert.Equal(SD.Role_Customer, AccountController.RegistrationRole(false, posted));
+
+    [Theory]
+    [InlineData(SD.Role_Admin)]
+    [InlineData(SD.Role_Employee)]
+    [InlineData(SD.Role_Company)]
+    [InlineData(SD.Role_Customer)]
+    public void An_admin_can_pick_any_known_role(string posted) =>
+        Assert.Equal(posted, AccountController.RegistrationRole(true, posted));
+
+    [Fact]
+    public void An_admin_without_a_choice_creates_a_customer() =>
+        Assert.Equal(SD.Role_Customer, AccountController.RegistrationRole(true, null));
+
+    [Theory]
+    [InlineData("SuperUser")]
+    [InlineData("admin")]
+    public void An_unknown_role_is_rejected_even_for_an_admin(string posted) =>
+        Assert.Null(AccountController.RegistrationRole(true, posted));
 }
