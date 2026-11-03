@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -155,28 +157,37 @@ public class CartOwnershipTests
     }
 }
 
-// Render sits behind Cloudflare: rate limits must count per visitor
-// (CF-Connecting-IP), not per Cloudflare server.
+// Caddy on the same machine is the only proxy: rate limits count per visitor,
+// and a visitor cannot pick their own address with a header.
 public class ClientIpTests
 {
-    private static HttpContext Context(string? header)
+    private static async Task<string> AddressSeen(string connectedFrom, params (string Name, string Value)[] headers)
     {
         var context = new DefaultHttpContext();
-        context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.1");
-        if (header != null) context.Request.Headers[ClientIp.CloudflareHeader] = header;
-        return context;
+        context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse(connectedFrom);
+        foreach (var (name, value) in headers) context.Request.Headers[name] = value;
+        var options = new ForwardedHeadersOptions();
+        ClientIp.ConfigureProxy(options);
+        var seen = "";
+        var middleware = new ForwardedHeadersMiddleware(
+            c => { seen = ClientIp.Of(c); return Task.CompletedTask; },
+            NullLoggerFactory.Instance, Options.Create(options));
+        await middleware.Invoke(context);
+        return seen;
     }
 
     [Fact]
-    public void Cloudflare_header_wins_over_the_proxy_address() =>
-        Assert.Equal("203.0.113.9", ClientIp.Of(Context("203.0.113.9")));
+    public async Task Caddy_passes_on_the_visitor_address() =>
+        Assert.Equal("203.0.113.9", await AddressSeen("127.0.0.1", ("X-Forwarded-For", "203.0.113.9")));
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("not-an-ip")]
-    [InlineData("1.2.3.4, 5.6.7.8")]
-    public void Without_a_valid_header_the_connection_address_is_used(string? header) =>
-        Assert.Equal("10.0.0.1", ClientIp.Of(Context(header)));
+    [Fact]
+    public async Task A_visitor_cannot_forge_the_address() =>
+        Assert.Equal("198.51.100.7", await AddressSeen("198.51.100.7",
+            ("X-Forwarded-For", "203.0.113.9"), ("CF-Connecting-IP", "203.0.113.10")));
+
+    [Fact]
+    public async Task Without_a_header_the_connection_address_is_used() =>
+        Assert.Equal("10.0.0.1", await AddressSeen("10.0.0.1"));
 }
 
 // Regression: the course version let anyone post Role=Admin on the sign-up form.

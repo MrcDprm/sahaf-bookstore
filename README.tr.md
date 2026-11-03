@@ -53,7 +53,7 @@ ASP.NET Core MVC ile yazılmış bir çevrim içi kitapçı. Sahaf, telifi sona 
 - Ödeme için **Stripe Checkout** ve webhook, e-posta için **Resend**
 - Sade CSS ve az miktarda JavaScript; frontend framework'ü yok
 - Testler için **xUnit**
-- **Render** üzerinde **Docker**, veritabanı **Neon**'da
+- Önde **Caddy** olan **Oracle Cloud** sunucusu, veritabanı **Neon**'da ([deploy/README.md](deploy/README.md))
 
 ## Kurulum ve Çalıştırma
 
@@ -90,8 +90,7 @@ src/
   Sahaf.Web/          Controller'lar, view'lar, yerelleştirme, Stripe, güvenlik ayarları
 tests/
   Sahaf.Tests/        Birim testleri
-Dockerfile            Render'da kullanılan konteyner
-render.yaml           Render servis tanımı
+deploy/               systemd servisi, Caddy site bloğu, yayın kılavuzu
 ```
 
 ### Güvenlik
@@ -114,7 +113,7 @@ render.yaml           Render servis tanımı
 - **Güvenilebilir ödeme.** Tarayıcının Stripe'tan dönüşü taklit edilebilir ya da hiç gerçekleşmeyebilir; bu yüzden sipariş Stripe'ın webhook'uyla da onaylanıyor. Webhook imzasını doğruluyorum, oturumu siparişle eşleştiriyorum ve "ödendi" adımını iki kez çalışsa da sorun çıkarmayacak şekilde yazdım.
 - **Rol değişikliği ne zaman geçerli olur?** Roller giriş cookie'sinde saklanıyor ve Identity bunu varsayılan olarak 30 dakikada bir kontrol ediyor. Kilitlenen bir kullanıcı siteyi kullanmaya devam edebiliyordu. Güvenlik damgasını her istekte kontrol edince kilit ve rol değişiklikleri anında geçerli oldu.
 - **Kaynak dosyası olmadan yerelleştirme.** İki JSON dosyasını okuyan küçük bir `IStringLocalizer` yazdım. Doğrulama mesajlarını ve alan adlarını da çeviriyor; bir test iki dilde anahtarların ve yer tutucuların aynı olduğunu kontrol ediyor.
-- **.NET'i ücretsiz barındırmak.** Vercel .NET çalıştırmadığı için uygulamayı Render için Docker'la paketledim, PostgreSQL için Neon kullandım. Uygulamanın önündeki proxy'yi yönetmeyi (forwarded header'lar, 443 portunda HTTPS), yayınlar arasında oturumlar düşmesin diye cookie anahtarlarını veritabanında tutmayı ve sunucunun diski silindiği için görselleri veritabanında saklamayı öğrendim.
+- **.NET'i ücretsiz barındırmak.** Vercel .NET çalıştırmadığı için uygulamayı önce Render için Docker'la paketledim, PostgreSQL için Neon kullandım. Render'ın ücretsiz planı 15 dakika sonra uyuduğu için uygulamayı Oracle Cloud sunucusuna taşıdım: kendi içinde çalışan Linux ARM paketi, systemd servisi ve önde HTTPS için Caddy. Uygulamanın önündeki proxy'yi yönetmeyi (forwarded header'lara yalnızca Caddy'den gelince inanmak, 443 portunda HTTPS), yayınlar arasında oturumlar düşmesin diye cookie anahtarlarını veritabanında tutmayı ve sunucuda veri kalmasın diye görselleri veritabanında saklamayı öğrendim.
 
 ## Kaynaklar
 

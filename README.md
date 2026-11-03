@@ -53,7 +53,7 @@ An online bookshop built with ASP.NET Core MVC. Sahaf sells public-domain classi
 - **Stripe Checkout** and webhooks for payments, **Resend** for e-mail
 - Plain CSS and a little JavaScript, no front-end framework
 - **xUnit** for tests
-- **Docker** on **Render**, database on **Neon**
+- **Oracle Cloud** server with **Caddy** in front, database on **Neon** ([deploy/README.md](deploy/README.md))
 
 ## Installation
 
@@ -90,8 +90,7 @@ src/
   Sahaf.Web/          Controllers, views, localization, Stripe, security settings
 tests/
   Sahaf.Tests/        Unit tests
-Dockerfile            Container used on Render
-render.yaml           Render service definition
+deploy/               systemd service, Caddy site block, deployment guide
 ```
 
 ### Security
@@ -114,7 +113,7 @@ render.yaml           Render service definition
 - **Payments I can trust.** The browser's return from Stripe can be faked or never happen, so the order is also confirmed by Stripe's webhook. I verify the webhook signature, match the session to the order, and made the "mark as paid" step safe to run twice.
 - **When a role change actually applies.** Roles are stored in the sign-in cookie, which Identity re-checks only every 30 minutes by default. A locked user could keep using the site. Checking the security stamp on every request made locks and role changes immediate.
 - **Localization without resource files.** I wrote a small `IStringLocalizer` that reads two JSON files. It also translates validation messages and field names, and a test makes sure both languages have the same keys and placeholders.
-- **Hosting .NET for free.** Vercel cannot run .NET, so I packaged the app in Docker for Render and used Neon for PostgreSQL. I learned to handle a proxy in front of the app (forwarded headers, HTTPS on port 443), keep cookie keys in the database so sign-ins survive deploys, and keep images in the database because the server's disk is wiped.
+- **Hosting .NET for free.** Vercel cannot run .NET, so I first packaged the app in Docker for Render and used Neon for PostgreSQL. Render's free plan slept after 15 minutes, so I moved it to an Oracle Cloud server: a self-contained Linux ARM build run by systemd, with Caddy in front for HTTPS. I learned to handle a proxy in front of the app (forwarded headers trusted only from Caddy, HTTPS on port 443), keep cookie keys in the database so sign-ins survive deploys, and keep images in the database so the server holds no data.
 
 ## Credits
 
