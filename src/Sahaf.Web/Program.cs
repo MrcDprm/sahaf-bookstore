@@ -109,16 +109,12 @@ builder.Services.AddRateLimiter(options =>
         "stripe", _ => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromMinutes(1) }));
 });
 
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    // Render terminates TLS at its proxy and forwards plain HTTP.
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownIPNetworks.Clear();
-    options.KnownProxies.Clear();
-});
+builder.Services.Configure<ForwardedHeadersOptions>(ClientIp.ConfigureProxy);
 
-// Behind Render's proxy the public port is always 443.
+// Behind Caddy the public port is always 443.
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+// Responses do not say "Server: Kestrel".
+builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
@@ -138,8 +134,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-    // Render's health check calls the container over plain HTTP; a redirect
-    // there would mark the service as down.
+    // A health check on the server itself calls plain HTTP; a redirect there
+    // would mark the service as down.
     app.UseWhen(context => !context.Request.Path.StartsWithSegments("/healthz"),
         branch => branch.UseHttpsRedirection());
 }
