@@ -364,3 +364,6 @@ FodyWeavers.xsd
 # Local secrets
 .env
 *.local.json
+
+# Server publish output (deploy/README.md)
+dist/

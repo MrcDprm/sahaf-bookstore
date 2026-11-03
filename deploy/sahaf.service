@@ -1,0 +1,40 @@
+# Sahaf (Oracle Cloud Always Free, Ubuntu). Caddy is in front; the app listens only on 127.0.0.1:8092.
+# Install as /etc/systemd/system/sahaf.service, details in deploy/README.md.
+[Unit]
+Description=Sahaf second-hand bookstore
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sahaf
+ExecStart=/opt/sahaf/Sahaf.Web
+Restart=always
+RestartSec=5
+
+# Secrets (DATABASE_URL, Stripe and Resend keys...) are in a file only root can read; not in the repo.
+EnvironmentFile=/etc/sahaf/sahaf.env
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://127.0.0.1:8092
+Environment=DOTNET_gcServer=0
+Environment=DOTNET_NOLOGO=1
+
+# Hardening: a temporary user on every start, a read-only file system, no home folders or other processes.
+# Cookie keys, books and cover images are all in Neon; the app writes nothing to disk.
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+# MemoryDenyWriteExecute stays off: the .NET JIT writes code at run time.
+
+[Install]
+WantedBy=multi-user.target
